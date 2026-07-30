@@ -7,17 +7,21 @@ if (isset($_POST['register'])) {
     //get variables 
     $full_name = trim($_POST['full_name']);
     $email = trim($_POST['email']);
-    $password = trim($_POST['password']);
-    $confirm_password = trim($_POST['confirm_password']);
+    $password = ($_POST['password']);
+    $confirm_password = ($_POST['confirm_password']);
+    $errors = [];
 
     //check full name
     if (empty($full_name)) {
     $errors[] = "Full name is required.";
     }
+    else if(strlen($full_name) < 3 || strlen($full_name) > 100){
+        $errors[] = "Full name must be between 3 and 100 characters long.";
+    }
 
     //check email
     //email pattern
-    $estracture="/^[a-zA-Z0-9]+@[a-zA-z0-9]+\.[a-zA-Z]{2,}$/";
+    $estracture="/^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z]{2,}$/";
     if (empty($email)) {
         $errors[] = "Email is required.";
    
@@ -27,30 +31,28 @@ if (isset($_POST['register'])) {
     }
 
     //check password
-    $empty=false;
-    $long_enough = true;
-    $inpattern = true;
+      $pstracture = "/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@#$!%*_?&])[A-Za-z\d@#$!%*_?&]{8,20}$/";
     if (empty($password)) {
         $errors[] = "Password is required.";
-        $empty = true;
+        
 
     } 
-    if (strlen($password) < 8 && !$empty) {
+    else if (strlen($password) < 8) {
         $errors[] = "Password must be at least 8 characters long.";
-        $long_enough = false;
+        
     }
     //password pattern
-    $pstracture = "/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@#$!%*_?&])[A-Za-z\d@#$!%*_?&]{8,20}$/";
-    if (!preg_match($pstracture, $password) && !$empty && $long_enough) {
-        $errors[] = "Password must be  8-20 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.";
-        $inpattern = false;
+    
+    else if (!preg_match($pstracture, $password)) {
+        $errors[] = "Password must be  8-20 characters long  with no spaces and contain at least one uppercase letter, one lowercase letter, one number, and one special character.";
+        
     }
 
     //check confirm password
-    if (empty($confirm_password) && !$empty && $long_enough && $inpattern) {
+    else if (empty($confirm_password)) {
         $errors[] = "Please confirm your password.";
     } 
-    if ($password !== $confirm_password && !$empty && $long_enough && $inpattern) {
+    else if ($password !== $confirm_password ) {
         $errors[] = "Passwords do not match.";
     }
 
@@ -85,6 +87,7 @@ if (isset($_POST['register'])) {
           required
         />
         <br />
+      <br />
         <button type="submit" id="register" name="register">Register</button>
       </form>
             <?php
