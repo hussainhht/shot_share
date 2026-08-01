@@ -69,8 +69,19 @@ if (isset($_POST['register'])) {
     else if ($password !== $confirm_password ) {
         $errors[] = "Passwords do not match.";
     }
+//----------------------------------end of validation----------------------------------
 
-}
+
+    //if no errors, insert into database
+    if (empty($errors)) {
+        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+        $stmt = $conn->prepare("INSERT INTO users (full_name, email, password) VALUES (?, ?, ?)");
+        $stmt->execute([$full_name, $email, $hashed_password]);
+        header("Location: login.php");
+        exit();
+    }
+
+}//end of register button click
 
 ?>
 
