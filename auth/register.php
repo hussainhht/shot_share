@@ -3,6 +3,8 @@
 require_once "../database/db_connect.php";
 
 
+
+
 if (isset($_POST['register'])) {
     //get variables 
     $full_name = trim($_POST['full_name']);
@@ -10,6 +12,11 @@ if (isset($_POST['register'])) {
     $password = ($_POST['password']);
     $confirm_password = ($_POST['confirm_password']);
     $errors = [];
+
+
+    $check_email = $conn->prepare("SELECT * FROM users WHERE email = ?");
+    $check_email->execute([$email]);
+
 
     //check full name
     if (empty($full_name)) {
@@ -29,6 +36,13 @@ if (isset($_POST['register'])) {
     else if (!preg_match($estracture, $email)) {
         $errors[] = "Invalid email format.";
     }
+    //chek if email already exists
+    
+    
+        else if ($check_email->rowCount() > 0) {
+            $errors[] = "Email already exists.";
+        }
+    
 
     //check password
       $pstracture = "/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@#$!%*_?&])[A-Za-z\d@#$!%*_?&]{8,20}$/";
