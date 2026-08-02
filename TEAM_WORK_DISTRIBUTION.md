@@ -51,10 +51,10 @@ includes/
 
 ### Completion Checklist
 
-- [ ] A new user can register.
-- [ ] Duplicate emails are rejected.
-- [ ] Passwords are stored securely as hashes.
-- [ ] Registered users can log in.
+- [x] A new user can register.
+- [x] Duplicate emails are rejected.
+- [x] Passwords are stored securely as hashes.
+- [x] Registered users can log in.
 - [ ] Logged-in users can log out.
 - [ ] Protected pages cannot be opened without login.
 - [ ] Users can update their full name.

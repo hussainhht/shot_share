@@ -126,7 +126,7 @@ if (isset($_POST['register'])) {
             ?>
 
       <br />
-      <p id="last">Already have an account? <a href="login.html">Log in</a></p>
+      <p id="last">Already have an account? <a href="login.php">Log in</a></p>
     </div>
   </body>
 </html>
