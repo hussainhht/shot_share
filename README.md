@@ -1,5 +1,12 @@
 # shot_share
 
+```Shell
+git add .
+git commit  -m "(name of changes)"
+git push
+git pull
+```
+
 ```
 SHOT_SHARE/
 │
