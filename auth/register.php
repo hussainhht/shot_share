@@ -58,7 +58,7 @@ if (isset($_POST['register'])) {
     //password pattern
     
     else if (!preg_match($pstracture, $password)) {
-        $errors[] = "Password must be  8-20 characters long  with no spaces and contain at least one uppercase letter, one lowercase letter, one number, and one special character.";
+        $errors[] = "Password must be  8-20 characters long  with no spaces and contain at least one uppercase letter, one lowercase letter, one number, and one special character(@#$!%*_?&).";
         
     }
 
