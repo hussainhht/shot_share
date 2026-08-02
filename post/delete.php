@@ -1,48 +1,159 @@
-
 <?php
-session_start();
-require_once '../config/database.php';
-require_once '../includes/auth.php';
-require_login(); // only logged-in users can access this
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    // If request method is not POST, redirect to home (or another page)
-    header('Location: ../index.php');
+session_start();
+
+require_once __DIR__ . '/../database/db_connect.php';
+
+/*
+|--------------------------------------------------------------------------
+| Check whether the user is logged in
+|--------------------------------------------------------------------------
+*/
+
+if (!isset($_SESSION['user_id'])) {
+    header('Location: ../auth/login.php');
+    echo '<p style="color:red;">You must log in before deleting a post.</p>';
     exit;
 }
 
-$post_id = $_POST['post_id'] ?? null;
+/*
+|--------------------------------------------------------------------------
+| Allow POST requests only
+|--------------------------------------------------------------------------
+*/
 
-if (!$post_id) {
-    die('Post ID is required.');
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header('Location: ../index.php?page=home');
+    echo '<p style="color:red;">Invalid request method. Please use the delete button.</p>';
+    exit;
 }
 
-// 1) Fetch the post and verify it exists
-$stmt = $pdo->prepare("SELECT * FROM posts WHERE post_id = ?");
-$stmt->execute([$post_id]);
-$post = $stmt->fetch(PDO::FETCH_ASSOC);
+/*
+|--------------------------------------------------------------------------
+| Validate the post ID
+|--------------------------------------------------------------------------
+*/
 
-if (!$post) {
-    die('Post not found.');
+$post_id = filter_input(
+    INPUT_POST,
+    'post_id',
+    FILTER_VALIDATE_INT
+);
+
+if (!$post_id || $post_id <= 0) {
+    http_response_code(400);
+    echo '<p style="color:red;">Invalid Post ID.</p>';
+    exit('Invalid Post ID.');
 }
 
-// 2) Verify that the current user is the owner of this post
-if ($post['user_id'] != $_SESSION['user_id']) {
-    die('You are not allowed to delete this post.');
-}
+$user_id = (int) $_SESSION['user_id'];
 
-// 3) Delete the image file from the server if it exists
-if (!empty($post['image_path'])) {
-    $file_path = __DIR__ . '/../' . $post['image_path'];
-    if (file_exists($file_path)) {
-        unlink($file_path);
+try {
+
+    //Fetch the post and verify ownership
+
+
+    $stmt = $conn->prepare(
+        'SELECT post_id, image_path
+         FROM posts
+         WHERE post_id = ?
+         AND user_id = ?'
+    );
+
+    $stmt->execute([
+        $post_id,
+        $user_id
+    ]);
+
+    $post = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$post) {
+        http_response_code(404);
+        exit('Post not found or you are not allowed to delete it.');
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Delete the post from the database
+    |--------------------------------------------------------------------------
+    |
+    | user_id is checked again during deletion for extra protection.
+    |
+    */
+
+    $delete = $conn->prepare(
+        'DELETE FROM posts
+         WHERE post_id = ?
+         AND user_id = ?'
+    );
+
+    $delete->execute([
+        $post_id,
+        $user_id
+    ]);
+
+    if ($delete->rowCount() !== 1) {
+        throw new RuntimeException('The post could not be deleted.');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Delete the post image
+    |--------------------------------------------------------------------------
+    |
+    | The database record is deleted first.
+    | If deleting the image fails, the website will not contain a broken post.
+    |
+    */
+
+    if (!empty($post['image_path'])) {
+
+        $image_name = basename($post['image_path']);
+
+        $file_path =
+            __DIR__ . '/../uploads/posts/' . $image_name;
+
+        if (is_file($file_path)) {
+
+            if (!unlink($file_path)) {
+                // Do not expose server information to the user
+                error_log(
+                    'Failed to delete post image: ' . $file_path
+                );
+            }
+        }
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Redirect to home
+    |--------------------------------------------------------------------------
+    */
+
+    header(
+        'Location: ../index.php?page=home&msg=post_deleted'
+    );
+
+    exit;
+
+} catch (PDOException $e) {
+
+    error_log(
+        'Database error while deleting post: ' .
+        $e->getMessage()
+    );
+
+    http_response_code(500);
+    exit('Failed to delete the post. Please try again.');
+
+} catch (RuntimeException $e) {
+
+    error_log(
+        'Post deletion error: ' .
+        $e->getMessage()
+    );
+
+    http_response_code(500);
+    echo '<p style="color:red;">Failed to delete the post. Please try again.</p>';
+    exit('Failed to delete the post. Please try again.');
 }
-
-// 4) Delete the post record from the database
-$del = $pdo->prepare("DELETE FROM posts WHERE post_id = ?");
-$del->execute([$post_id]);
-
-// 5) Redirect to home page (or another page) with a message
-header('Location: ../index.php?msg=post_deleted');
-exit;

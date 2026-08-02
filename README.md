@@ -8,64 +8,49 @@ git pull
 ```
 
 ```
-SHOT_SHARE/
+shot_share/
 │
 ├── index.php
 │
 ├── auth/
-│   ├── register.php
 │   ├── login.php
+│   ├── register.php
 │   └── logout.php
 │
-├── posts/
+├── database/
+│   ├── db_connect.php
+│   └── schema.sql
+│
+├── includes/
+│   ├── sidebar.php
+│   ├── header.php
+│   ├── footer.php
+│   └── messages.php
+│
+├── pages/
+│   ├── home.php
+│   ├── search.php
+│   ├── profile.php
+│   └── not-found.php
+│
+├── post/
 │   ├── create.php
 │   ├── view.php
 │   └── delete.php
 │
-├── profile/
-│   └── edit.php
-│
-├── search/
-│   ├── index.php
+├── api/
 │   └── search-api.php
-│
-├── includes/
-│   ├── header.php
-│   ├── navbar.php
-│   ├── footer.php
-│   ├── auth.php
-│   ├── functions.php
-│   └── messages.php
-│
-├── config/
-│   └── database.php
 │
 ├── assets/
 │   ├── css/
-│   │   ├── style.css
-│   │   ├── auth.css
-│   │   ├── posts.css
-│   │   └── profile.css
+│   │   └── style.css
 │   │
-│   ├── js/
-│   │   ├── main.js
-│   │   ├── image-preview.js
-│   │   ├── delete-confirmation.js
-│   │   └── search.js
-│   │
-│   └── images/
-│       ├── logo.png
-│       └── default-avatar.png
+│   └── js/
+│       ├── main.js
+│       ├── search.js
+│       ├── image-preview.js
+│       └── delete-confirmation.js
 │
-├── uploads/
-│   └── posts/
-│
-├── database/
-│   ├── schema.sql
-│   └── sample-data.sql
-│
-├── docs/
-│   └── Project.pdf
-│
-├── README.md
+└── uploads/
+    └── posts/
 ```
