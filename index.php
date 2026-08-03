@@ -17,6 +17,7 @@ $routes = [
     'create-post' => __DIR__ . '/post/create.php',
     'profile_edit' => __DIR__ . '/profile/edit.php',
     'search' => __DIR__ . '/pages/search.php',
+    'cats' => __DIR__ . '/pages/cat.php',
     'view-post' => __DIR__ . '/post/view.php'
 ];
 
@@ -188,6 +189,18 @@ if (count($sidebar_name_parts) > 1) {
                         &#8981;
                     </span>
                     <span class="sidebar-copy">Search</span>
+                </a>
+
+                <a
+                    class="sidebar-link<?= $page === 'cats' ? ' is-active' : '' ?>"
+                    href="index.php?page=cats"
+                    title="Cats"
+                    <?= $page === 'cats' ? 'aria-current="page"' : '' ?>
+                >
+                    <span class="sidebar-icon" aria-hidden="true">
+                        &#128049;&#65038;
+                    </span>
+                    <span class="sidebar-copy">Cats</span>
                 </a>
 
                 <a
