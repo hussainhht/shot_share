@@ -1,6 +1,10 @@
 <?php
-session_start();
-require_once "../database/db_connect.php";
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+include __DIR__ . "/../database/db_connect.php";
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: ../auth/login.php");
@@ -11,7 +15,7 @@ if (!isset($_SESSION['user_id'])) {
 $user_id = $_SESSION['user_id'];
 $errors = [];
 
-$stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
+$stmt = $conn->prepare("SELECT * FROM users WHERE user_id = ?");
 $stmt->execute([$user_id]);
 
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -106,17 +110,9 @@ if (!empty($new_password) || !empty($confirm_password)) {
 
 
 ?>
-<!DOCTYPE html>
-<html>
 
-<head>
-    <title>Edit Profile</title>
-</head>
-
-
-<body>
-
-<div class="edit">
+<section class="profile-edit">
+    <div class="edit">
     <h1>Edit Profile</h1>
     <form method="POST" action="">
        
@@ -134,18 +130,15 @@ if (!empty($new_password) || !empty($confirm_password)) {
         <input type="password" id="confirm_password" name="confirm_password" ><br><br>
         <button type="submit" name="save_changes">Save Changes</button>
     </form>
-    <p style="color: red;">
             <?php
             if (!empty($errors)) {
                 foreach ($errors as $error) {
-                    echo $error . "<br>";
+                    echo "<p style=\"color: red;\">" . htmlspecialchars($error, ENT_QUOTES, 'UTF-8') . "</p>";
                 }
             }
             ?>
             </div>
 
+</section>
 
-</body>
 
-
-</html>

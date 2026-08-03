@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shot Share — Share Moments. Connect People.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream: #FBF3DE;
+    --cream-2: #F7ECCF;
+    --ink: #2A2118;
+    --ink-soft: #55493c;
+    --orange: #DD8A3D;
+    --orange-dark: #C97527;
+    --orange-light: #E8A85F;
+    --card-icon-bg: #E7E0C4;
+    --line: #ECE0BE;
+    --white: #FFFFFF;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Inter', sans-serif;
+    background:var(--cream);
+    color:var(--ink);
+    overflow-x:hidden;
+    position:relative;
+  }
+  h1,h2,h3,.brand,.btn-primary,.stat-badge,.feature-title{
+    font-family:'Poppins', sans-serif;
+  }
+
+  a{text-decoration:none;color:inherit;}
+
+  /* ---------- decorative background ---------- */
+  .bg-decor{
+    position:absolute;
+    inset:0;
+    overflow:hidden;
+    pointer-events:none;
+    z-index:0;
+  }
+  .blob{
+    position:absolute;
+    border-radius:50%;
+  }
+  .blob.orange{ background: rgba(221,138,61,0.18); }
+  .blob.cream{ background: rgba(255,255,255,0.35); }
+
+  .dots{
+    position:absolute;
+    display:grid;
+    grid-template-columns:repeat(6, 1fr);
+    gap:10px;
+  }
+  .dots span{
+    width:5px;height:5px;border-radius:50%;
+    background:rgba(150,130,80,0.35);
+    display:block;
+  }
+
+  .lines-decor{
+    position:absolute;
+    width:160px;height:160px;
+    border-radius:50%;
+    background:
+      repeating-linear-gradient(
+        135deg,
+        rgba(200,140,60,0.25) 0px,
+        rgba(200,140,60,0.25) 1.5px,
+        transparent 1.5px,
+        transparent 10px
+      );
+    opacity:0.6;
+  }
+
+  .rings-decor{
+    position:absolute;
+    width:220px; height:220px;
+    border-radius:50%;
+    border: 1.5px dashed rgba(200,140,60,0.35);
+  }
+  .rings-decor::before{
+    content:"";
+    position:absolute;
+    inset:22px;
+    border-radius:50%;
+    border: 1.5px dashed rgba(200,140,60,0.28);
+  }
+  .rings-decor::after{
+    content:"";
+    position:absolute;
+    inset:44px;
+    border-radius:50%;
+    border: 1.5px dashed rgba(200,140,60,0.22);
+  }
+
+  /* ---------- header ---------- */
+  header{
+    position:relative;
+    z-index:5;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:20px 64px;
+    border-bottom:1px solid var(--line);
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-size:22px;
+    font-weight:700;
+    color:var(--ink);
+  }
+  .brand-icon{
+    width:44px;height:44px;
+    border-radius:14px;
+    background:linear-gradient(145deg, var(--orange-light), var(--orange-dark));
+    display:flex;align-items:center;justify-content:center;
+    box-shadow: 0 6px 14px rgba(201,117,39,0.35);
+  }
+  .brand-icon svg{width:22px;height:22px;}
+
+  nav{
+    display:flex;
+    align-items:center;
+    gap:40px;
+  }
+  nav a.nav-link{
+    font-size:15.5px;
+    font-weight:500;
+    color:var(--ink);
+    opacity:0.85;
+    transition:opacity .2s ease;
+  }
+  nav a.nav-link:hover{opacity:1;}
+
+  .btn-join{
+    background: linear-gradient(135deg, var(--orange), var(--orange-dark));
+    color:#fff;
+    font-weight:600;
+    font-size:15px;
+    padding:12px 26px;
+    border-radius:12px;
+    border:none;
+    cursor:pointer;
+    box-shadow: 0 8px 18px rgba(201,117,39,0.3);
+    transition: transform .18s ease, box-shadow .18s ease;
+  }
+  .btn-join:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 12px 22px rgba(201,117,39,0.4);
+  }
+
+  /* ---------- main layout ---------- */
+  main{
+    position:relative;
+    z-index:2;
+    display:grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap:40px;
+    padding:64px 64px 40px;
+    align-items:start;
+  }
+
+  .hero h1{
+    font-size:52px;
+    line-height:1.08;
+    font-weight:800;
+    margin:0 0 20px;
+    letter-spacing:-0.5px;
+  }
+  .hero h1 .accent{ color:var(--orange-dark); display:block; }
+
+  .hero p.lede{
+    font-size:17px;
+    line-height:1.6;
+    color:var(--ink-soft);
+    max-width:520px;
+    margin:0 0 34px;
+  }
+
+  .features{
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+    margin-bottom:44px;
+  }
+  .feature{
+    display:flex;
+    align-items:flex-start;
+    gap:16px;
+  }
+  .feature-icon{
+    flex:0 0 auto;
+    width:48px;height:48px;
+    border-radius:12px;
+    background:var(--card-icon-bg);
+    display:flex;align-items:center;justify-content:center;
+    color:var(--ink);
+  }
+  .feature-icon svg{width:22px;height:22px;}
+  .feature-title{
+    font-size:16.5px;
+    font-weight:600;
+    margin:0 0 3px;
+    color:var(--ink);
+  }
+  .feature-text{
+    font-size:14.5px;
+    color:var(--ink-soft);
+    margin:0;
+    line-height:1.4;
+  }
+
+  /* ---------- photo stack ---------- */
+  .photo-stack{
+    position:relative;
+    display:flex;
+    align-items:flex-end;
+    gap:20px;
+    height:280px;
+    padding-left:6px;
+  }
+  .photo-card{
+    position:relative;
+    border-radius:20px;
+    overflow:hidden;
+    box-shadow: 0 20px 40px rgba(60,40,10,0.18);
+    flex-shrink:0;
+  }
+  .photo-card img{
+    display:block;
+    width:100%; height:100%;
+    object-fit:cover;
+  }
+  .photo-card.p1{ width:220px; height:230px; transform: rotate(-4deg) translateY(10px); }
+  .photo-card.p2{ width:250px; height:280px; z-index:2; }
+  .photo-card.p3{ width:210px; height:250px; transform: rotate(4deg) translateY(20px); }
+
+  .stat-badge{
+    position:absolute;
+    top:14px; left:14px;
+    background:rgba(255,255,255,0.95);
+    padding:7px 12px;
+    border-radius:20px;
+    font-size:13.5px;
+    font-weight:600;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.12);
+    color:var(--ink);
+  }
+  .stat-badge svg{width:15px;height:15px;}
+
+  /* ---------- sign in card ---------- */
+  .signin-card{
+    position:relative;
+    z-index:3;
+    background:rgba(255,255,255,0.55);
+    backdrop-filter: blur(6px);
+    border:1px solid rgba(255,255,255,0.7);
+    border-radius:26px;
+    padding:40px 44px 36px;
+    box-shadow: 0 30px 60px rgba(120,90,40,0.12);
+  }
+  .signin-head{
+    text-align:center;
+    margin-bottom:28px;
+  }
+  .signin-icon{
+    width:64px;height:64px;
+    margin:0 auto 18px;
+    border-radius:18px;
+    background:linear-gradient(145deg, var(--orange-light), var(--orange-dark));
+    display:flex;align-items:center;justify-content:center;
+    box-shadow: 0 10px 20px rgba(201,117,39,0.35);
+  }
+  .signin-icon svg{width:30px;height:30px;}
+  .signin-head h2{
+    font-size:27px;
+    font-weight:700;
+    margin:0 0 8px;
+  }
+  .signin-head p{
+    font-size:14.5px;
+    color:var(--ink-soft);
+    margin:0;
+  }
+
+  .field{ margin-bottom:20px; }
+  .field label{
+    display:block;
+    font-size:14px;
+    font-weight:600;
+    margin-bottom:8px;
+    color:var(--ink);
+  }
+  .input-wrap{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:#fff;
+    border:1px solid #EADFC0;
+    border-radius:12px;
+    padding:13px 16px;
+  }
+  .input-wrap svg{
+    width:18px;height:18px;
+    color:#9a8c72;
+    flex-shrink:0;
+  }
+  .input-wrap input{
+    border:none;
+    outline:none;
+    flex:1;
+    font-size:14.5px;
+    font-family:'Inter', sans-serif;
+    background:transparent;
+    color:var(--ink);
+  }
+  .input-wrap input::placeholder{ color:#a89b82; }
+  .input-wrap .eye-btn{
+    background:none;border:none;cursor:pointer;padding:0;
+    color:#9a8c72;
+    display:flex;
+  }
+
+  .row-between{
+    display:flex;
+    justify-content:flex-end;
+    margin:-8px 0 22px;
+  }
+  .forgot{
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--orange-dark);
+  }
+  .forgot:hover{ text-decoration:underline; }
+
+  .btn-primary{
+    width:100%;
+    background: linear-gradient(135deg, var(--orange), var(--orange-dark));
+    color:#fff;
+    font-weight:600;
+    font-size:16px;
+    padding:15px;
+    border-radius:13px;
+    border:none;
+    cursor:pointer;
+    box-shadow: 0 12px 24px rgba(201,117,39,0.32);
+    transition: transform .18s ease, box-shadow .18s ease;
+  }
+  .btn-primary:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 16px 28px rgba(201,117,39,0.4);
+  }
+
+  .divider{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin:24px 0 20px;
+    color:#a89b82;
+    font-size:13px;
+  }
+  .divider::before, .divider::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:#EADFC0;
+  }
+
+  .btn-social{
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    background:#fff;
+    border:1px solid #EADFC0;
+    border-radius:12px;
+    padding:13px;
+    font-size:14.5px;
+    font-weight:600;
+    color:var(--ink);
+    cursor:pointer;
+    margin-bottom:14px;
+    transition: background .18s ease, transform .18s ease;
+  }
+  .btn-social:hover{ background:#FFFBF0; transform: translateY(-1px); }
+  .btn-social svg{ width:19px; height:19px; }
+
+  .signup-line{
+    text-align:center;
+    font-size:14px;
+    color:var(--ink-soft);
+    margin-top:8px;
+  }
+  .signup-line a{
+    color:var(--orange-dark);
+    font-weight:600;
+  }
+  .signup-line a:hover{ text-decoration:underline; }
+
+  /* ---------- footer ---------- */
+  footer{
+    position:relative;
+    z-index:2;
+    text-align:center;
+    padding:26px 20px;
+    border-top:1px solid var(--line);
+    font-size:13.5px;
+    color:var(--ink-soft);
+    margin-top:20px;
+  }
+  footer a{ color:var(--ink-soft); }
+  footer a:hover{ color:var(--orange-dark); }
+  .footer-sep{ margin:0 10px; opacity:0.5; }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 1100px){
+    header{ padding:18px 32px; }
+    main{ grid-template-columns:1fr; padding:40px 32px; }
+    .hero h1{ font-size:42px; }
+    .photo-stack{ margin-top:20px; }
+    nav{ gap:24px; }
+  }
+
+  @media (max-width: 680px){
+    header{ padding:16px 20px; flex-wrap:wrap; gap:14px; }
+    nav{ display:none; }
+    .hero h1{ font-size:34px; }
+    main{ padding:28px 18px; }
+    .photo-stack{ flex-wrap:wrap; height:auto; gap:14px; }
+    .photo-card.p1, .photo-card.p2, .photo-card.p3{ width:100%; height:200px; transform:none; }
+    .signin-card{ padding:30px 22px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-decor">
+  <div class="blob orange" style="width:220px;height:220px;top:-60px;left:-80px;"></div>
+  <div class="lines-decor" style="top:110px; left:-40px;"></div>
+  <div class="rings-decor" style="top:520px; right:-60px;"></div>
+  <div class="blob orange" style="width:260px;height:260px;bottom:-80px;right:120px;"></div>
+  <div class="blob cream" style="width:180px;height:180px;bottom:60px;right:340px;"></div>
+  <div class="dots" style="top:160px; left:10px; grid-template-columns:repeat(4,1fr);">
+    <span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span>
+  </div>
+  <div class="dots" style="top:640px; right:10px; grid-template-columns:repeat(4,1fr);">
+    <span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span>
+  </div>
+  <div class="dots" style="top:770px; left:30px; grid-template-columns:repeat(3,1fr);">
+    <span></span><span></span><span></span>
+    <span></span><span></span><span></span>
+  </div>
+</div>
+
+<header>
+  <div class="brand">
+    <span class="brand-icon">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 8a2 2 0 0 1 2-2h1.5l1-1.5h7l1 1.5H18a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8Z" stroke="white" stroke-width="1.8" stroke-linejoin="round"/>
+        <circle cx="12" cy="12" r="3.2" stroke="white" stroke-width="1.8"/>
+      </svg>
+    </span>
+    Shot Share
+  </div>
+  <nav>
+    <a class="nav-link" href="#">Home</a>
+    <a class="nav-link" href="#">Explore</a>
+    <a class="nav-link" href="#">About</a>
+  </nav>
+  <button class="btn-join">Join Now</button>
+</header>
+
+<main>
+  <section class="hero">
+    <h1>Share Moments.<span class="accent">Connect People.</span></h1>
+    <p class="lede">Shot Share is the best place to discover new people, share your ideas, and build meaningful connections.</p>
+
+    <div class="features">
+      <div class="feature">
+        <span class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="8.5" cy="8" r="3" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M2.5 19c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <circle cx="16.5" cy="8.5" r="2.3" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M15 13.7c2.6.3 4.5 2.2 4.5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <div>
+          <p class="feature-title">Connect with friends</p>
+          <p class="feature-text">Follow people and stay updated with their posts.</p>
+        </div>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 5.5h16v10.5H9l-4 3.5v-3.5H4V5.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <div>
+          <p class="feature-title">Share your moments</p>
+          <p class="feature-text">Post photos, thoughts and ideas with the world.</p>
+        </div>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 20s-7.5-4.6-9.8-9.1C.7 7.4 2.4 4 5.8 4c2 0 3.4 1.1 4.2 2.3C10.8 5.1 12.2 4 14.2 4c3.4 0 5.1 3.4 3.6 6.9C15.5 15.4 12 20 12 20Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <div>
+          <p class="feature-title">Discover new things</p>
+          <p class="feature-text">Explore trending topics and popular posts.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="photo-stack">
+      <div class="photo-card p1">
+        <img src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=420&fit=crop" alt="City street with traffic light and cars">
+        <span class="stat-badge">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.6-9.8-9.1C.7 8.4 2.4 5 5.8 5c2 0 3.4 1.1 4.2 2.3C10.8 6.1 12.2 5 14.2 5c3.4 0 5.1 3.4 3.6 6.9C15.5 16.4 12 21 12 21Z"/></svg>
+          128
+        </span>
+      </div>
+      <div class="photo-card p2">
+        <img src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=460&h=560&fit=crop" alt="Woman taking a selfie on a city street at night">
+        <span class="stat-badge">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 5.5h16v10.5H9l-4 3.5v-3.5H4V5.5Z"/></svg>
+          128
+        </span>
+      </div>
+      <div class="photo-card p3">
+        <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=420&h=500&fit=crop" alt="Man in a jacket smiling and holding a coffee cup, using his phone">
+        <span class="stat-badge">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 21v-8h3v8H2Zm5 0V10l6-5 .9.7c.3.2.4.6.3 1L13 11h6.5c.8 0 1.5.7 1.5 1.5 0 .2 0 .4-.1.5l-2.5 6a2 2 0 0 1-1.9 1.3H7Z"/></svg>
+          256
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <aside class="signin-card">
+    <div class="signin-head">
+      <div class="signin-icon">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4 8a2 2 0 0 1 2-2h1.5l1-1.5h7l1 1.5H18a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8Z" stroke="white" stroke-width="1.8" stroke-linejoin="round"/>
+          <circle cx="12" cy="12" r="3.2" stroke="white" stroke-width="1.8"/>
+        </svg>
+      </div>
+      <h2>Welcome Back 👋</h2>
+      <p>Sign in to continue to your account</p>
+    </div>
+
+    <form onsubmit="return false;">
+      <div class="field">
+        <label for="email">Email</label>
+        <div class="input-wrap">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 6.5h18v11H3v-11Z" stroke="currentColor" stroke-width="1.6"/><path d="M4 7l8 6 8-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <input id="email" type="email" placeholder="Example@email.com">
+        </div>
+      </div>
+
+      <div class="field" style="margin-bottom:8px;">
+        <label for="password">Password</label>
+        <div class="input-wrap">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="10.5" width="14" height="9" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" stroke="currentColor" stroke-width="1.6"/></svg>
+          <input id="password" type="password" placeholder="At least 8 characters">
+          <button type="button" class="eye-btn" aria-label="Show password" onclick="togglePassword()">
+            <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 12s3.5-6.5 10-6.5S22 12 22 12s-3.5 6.5-10 6.5S2 12 2 12Z" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="2.6" stroke="currentColor" stroke-width="1.6"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="row-between">
+        <a class="forgot" href="#">Forgot Password?</a>
+      </div>
+
+      <button type="submit" class="btn-primary">Sign in</button>
+
+      <div class="divider">or</div>
+
+      <button type="button" class="btn-social">
+        <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M23.5 12.27c0-.79-.07-1.54-.19-2.27H12v4.3h6.47c-.28 1.5-1.13 2.77-2.4 3.62v3h3.87c2.27-2.09 3.56-5.17 3.56-8.65Z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.94-2.92l-3.87-3c-1.08.72-2.45 1.15-4.07 1.15-3.13 0-5.78-2.11-6.73-4.96H1.27v3.09C3.25 21.3 7.31 24 12 24Z"/><path fill="#FBBC05" d="M5.27 14.27A7.2 7.2 0 0 1 4.89 12c0-.79.14-1.56.38-2.27V6.64H1.27A11.98 11.98 0 0 0 0 12c0 1.94.46 3.77 1.27 5.36l4-3.09Z"/><path fill="#EA4335" d="M12 4.77c1.77 0 3.35.61 4.6 1.8l3.44-3.44C17.94 1.19 15.24 0 12 0 7.31 0 3.25 2.7 1.27 6.64l4 3.09C6.22 6.88 8.87 4.77 12 4.77Z"/></svg>
+        Continue with Google
+      </button>
+      <button type="button" class="btn-social">
+        <svg viewBox="0 0 24 24"><path fill="#1877F2" d="M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.79-4.69 4.53-4.69 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.95.93-1.95 1.89v2.25h3.32l-.53 3.49h-2.79V24C19.61 23.1 24 18.1 24 12.07Z"/></svg>
+        Continue with Facebook
+      </button>
+
+      <p class="signup-line">Don't have an account? <a href="#">Sign up</a></p>
+    </form>
+  </aside>
+</main>
+
+<footer>
+  © 2024 Shot Share. All rights reserved.
+  <span class="footer-sep">|</span> <a href="#">Privacy Policy</a>
+  <span class="footer-sep">|</span> <a href="#">Terms of Service</a>
+  <span class="footer-sep">|</span> <a href="#">Contact</a>
+</footer>
+
+<script>
+function togglePassword(){
+  const input = document.getElementById('password');
+  const icon = document.getElementById('eyeIcon');
+  if(input.type === 'password'){
+    input.type = 'text';
+    icon.innerHTML = '<path d="M3 3l18 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M9.9 5.1A10.6 10.6 0 0 1 12 5c6.5 0 10 6.5 10 6.5a13.3 13.3 0 0 1-3.1 3.9M6.5 6.6C4 8.2 2 12 2 12s3.5 6.5 10 6.5c1.4 0 2.7-.3 3.8-.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M9.9 10a2.6 2.6 0 0 0 3.6 3.6" stroke="currentColor" stroke-width="1.6"/>';
+  } else {
+    input.type = 'password';
+    icon.innerHTML = '<path d="M2 12s3.5-6.5 10-6.5S22 12 22 12s-3.5 6.5-10 6.5S2 12 2 12Z" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="2.6" stroke="currentColor" stroke-width="1.6"/>';
+  }
+}
+</script>
+
+</body>
+</html>

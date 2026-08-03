@@ -1,0 +1,101 @@
+/*
+ * Shot Share light theme source
+ * Golden Summer Fields: https://coolors.co/ccd5ae-e9edc9-fefae0-faedcd-d4a373
+ *
+ * This project has no Sass build pipeline. Keep this source synchronized with
+ * the browser-ready custom properties at the top of assets/css/style.css.
+ */
+
+/* Foundation palette */
+$tea-green: #ccd5ae;
+$beige: #e9edc9;
+$cornsilk: #fefae0;
+$papaya-whip: #faedcd;
+$light-bronze: #d4a373;
+
+/* Reusable palette gradients */
+$gradient-light-top: linear-gradient(
+    0deg,
+    $tea-green,
+    $beige,
+    $cornsilk,
+    $papaya-whip,
+    $light-bronze
+);
+$gradient-light-right: linear-gradient(
+    90deg,
+    $tea-green,
+    $beige,
+    $cornsilk,
+    $papaya-whip,
+    $light-bronze
+);
+$gradient-light-radial: radial-gradient(
+    circle,
+    $cornsilk 0%,
+    $beige 58%,
+    $tea-green 100%
+);
+
+/*
+ * Semantic light-theme tokens. Dark mode defines the same public properties
+ * in darkmode.scss so components never need palette-specific color values.
+ */
+@mixin shot-share-light-theme {
+    color-scheme: light;
+
+    --palette-tea-green: #{$tea-green};
+    --palette-beige: #{$beige};
+    --palette-cornsilk: #{$cornsilk};
+    --palette-papaya-whip: #{$papaya-whip};
+    --palette-light-bronze: #{$light-bronze};
+
+    --bg-page: #{$cornsilk};
+    --bg-surface: #fffdf4;
+    --bg-surface-raised: #{$papaya-whip};
+    --bg-surface-muted: #{$beige};
+    --bg-nav: #{$cornsilk};
+    --bg-image: #{$beige};
+    --bg-overlay: rgba(51, 41, 31, 0.56);
+
+    --text-primary: #33291f;
+    --text-secondary: #625744;
+    --text-muted: #74664e;
+
+    --accent: #{$light-bronze};
+    --accent-hover: #c58b52;
+    --accent-active: #b9783d;
+    --accent-soft: #{$papaya-whip};
+    --on-accent: #2b1b0f;
+
+    --link: #7b4821;
+    --link-hover: #5f3517;
+
+    --border: #b8c08f;
+    --border-soft: #dddcc1;
+    --border-strong: #8c9863;
+    --input-bg: #fffef8;
+
+    --focus: #7b4821;
+    --focus-ring: rgba(123, 72, 33, 0.28);
+
+    --danger: #8d2f2b;
+    --danger-bg: #f9ded5;
+    --danger-border: #cf8e83;
+    --on-danger: #fff9f4;
+
+    --success: #366238;
+    --success-bg: #e1edd2;
+    --success-border: #90ad76;
+    --on-success: #f9fff3;
+
+    --shadow-sm: 0 0.25rem 0.9rem rgba(76, 58, 31, 0.08);
+    --shadow-md: 0 1rem 2.5rem rgba(76, 58, 31, 0.14);
+    --selection-bg: #{$tea-green};
+    --selection-text: #33291f;
+}
+
+:root,
+[data-theme="light"] {
+    @include shot-share-light-theme;
+}

@@ -170,191 +170,209 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     >
 
     <title>Register | Shot Share</title>
+
+    <link
+        rel="stylesheet"
+        href="../assets/css/style.css"
+    >
+
+    <script
+        src="../assets/js/main.js"
+        defer
+    ></script>
 </head>
 
-<body>
+<body class="auth-body">
 
-<div class="first">
+<div class="auth-page auth-page-register">
 
-    <h1>Create Account</h1>
+    <header class="auth-topbar">
 
-    <?php if (!empty($errors)): ?>
+        <a class="auth-brand" href="login.php">
+            <span class="auth-brand-mark" aria-hidden="true"></span>
+            <span>Shot Share</span>
+        </a>
 
-        <div class="errors">
-
-            <?php foreach ($errors as $error): ?>
-
-                <p style="color: red;">
-                    <?= htmlspecialchars(
-                        $error,
-                        ENT_QUOTES,
-                        "UTF-8"
-                    ) ?>
-                </p>
-
-            <?php endforeach; ?>
-
-        </div>
-
-    <?php endif; ?>
-
-    <form method="POST" action="">
-
-        <label for="full_name">
-            Full Name:
-        </label>
-
-        <input
-            type="text"
-            id="full_name"
-            name="full_name"
-            value="<?= htmlspecialchars(
-                $full_name,
-                ENT_QUOTES,
-                "UTF-8"
-            ) ?>"
-            minlength="3"
-            maxlength="100"
-            autocomplete="name"
-            required
+        <button
+            class="auth-theme-toggle"
+            id="theme-toggle"
+            type="button"
+            aria-pressed="false"
+            title="Switch theme"
         >
-
-        <br><br>
-
-        <label for="email">
-            Email:
-        </label>
-
-        <input
-            type="email"
-            id="email"
-            name="email"
-            value="<?= htmlspecialchars(
-                $email,
-                ENT_QUOTES,
-                "UTF-8"
-            ) ?>"
-            autocomplete="email"
-            required
-        >
-
-        <br><br>
-
-        <label for="password">
-            Password:
-        </label>
-
-        <input
-            type="password"
-            id="password"
-            name="password"
-            minlength="8"
-            maxlength="20"
-            autocomplete="new-password"
-            required
-        >
-
-        <p>
-            Password must contain 8-20 characters, one uppercase
-            letter, one lowercase letter, one number, and one special
-            character.
-        </p>
-
-        <label for="confirm_password">
-            Confirm Password:
-        </label>
-
-        <input
-            type="password"
-            id="confirm_password"
-            name="confirm_password"
-            minlength="8"
-            maxlength="20"
-            autocomplete="new-password"
-            required
-        >
-
-        <br><br>
-
-        <button type="submit" name="register">
-            Register
+            <span id="theme-toggle-icon" aria-hidden="true">&#9680;</span>
+            <span id="theme-toggle-label">Dark Mode</span>
         </button>
 
-    </form>
+    </header>
 
-    <p id="last">
-        Already have an account?
-        <a href="login.php">Log in</a>
-    </p>
+    <main class="auth-main">
+
+        <section class="auth-intro" aria-labelledby="register-intro-title">
+            <p class="auth-eyebrow">Join the community</p>
+
+            <h1 id="register-intro-title">
+                Your next moment
+                <span>starts here.</span>
+            </h1>
+
+            <p class="auth-intro-text">
+                Create one account to publish posts, share photos, and keep up
+                with the Shot Share community.
+            </p>
+
+            <div class="auth-benefits" aria-label="Shot Share features">
+                <div class="auth-benefit">
+                    <span aria-hidden="true">01</span>
+                    <p>
+                        <strong>Create your space</strong>
+                        <small>Keep your posts connected to your account.</small>
+                    </p>
+                </div>
+
+                <div class="auth-benefit">
+                    <span aria-hidden="true">02</span>
+                    <p>
+                        <strong>Share your view</strong>
+                        <small>Publish text and photos for others to see.</small>
+                    </p>
+                </div>
+
+                <div class="auth-benefit">
+                    <span aria-hidden="true">03</span>
+                    <p>
+                        <strong>Discover more</strong>
+                        <small>Search and explore community posts.</small>
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section class="auth-card auth-card-register" aria-labelledby="register-title">
+
+            <div class="auth-card-header">
+                <span class="auth-card-mark" aria-hidden="true"></span>
+                <p class="auth-eyebrow">New account</p>
+                <h2 id="register-title">Create your account</h2>
+                <p>Use your details below to get started.</p>
+            </div>
+
+            <?php if (!empty($errors)): ?>
+
+                <div class="errors auth-alert" role="alert">
+                    <p>Please check the following:</p>
+
+                    <ul>
+                        <?php foreach ($errors as $error): ?>
+                            <li>
+                                <?= htmlspecialchars(
+                                    $error,
+                                    ENT_QUOTES,
+                                    "UTF-8"
+                                ) ?>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+
+            <?php endif; ?>
+
+            <form class="auth-form" method="POST" action="">
+
+                <div class="auth-field">
+                    <label for="full_name">Full name</label>
+
+                    <input
+                        type="text"
+                        id="full_name"
+                        name="full_name"
+                        value="<?= htmlspecialchars(
+                            $full_name,
+                            ENT_QUOTES,
+                            "UTF-8"
+                        ) ?>"
+                        placeholder="Your full name"
+                        minlength="3"
+                        maxlength="100"
+                        autocomplete="name"
+                        required
+                    >
+                </div>
+
+                <div class="auth-field">
+                    <label for="email">Email address</label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        value="<?= htmlspecialchars(
+                            $email,
+                            ENT_QUOTES,
+                            "UTF-8"
+                        ) ?>"
+                        placeholder="name@example.com"
+                        autocomplete="email"
+                        required
+                    >
+                </div>
+
+                <div class="auth-field">
+                    <label for="password">Password</label>
+
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Create a strong password"
+                        minlength="8"
+                        maxlength="20"
+                        autocomplete="new-password"
+                        aria-describedby="password-requirements"
+                        required
+                    >
+
+                    <p class="auth-help" id="password-requirements">
+                        8-20 characters with uppercase, lowercase, number, and
+                        special character.
+                    </p>
+                </div>
+
+                <div class="auth-field">
+                    <label for="confirm_password">Confirm password</label>
+
+                    <input
+                        type="password"
+                        id="confirm_password"
+                        name="confirm_password"
+                        placeholder="Enter the password again"
+                        minlength="8"
+                        maxlength="20"
+                        autocomplete="new-password"
+                        required
+                    >
+                </div>
+
+                <button
+                    class="auth-submit"
+                    type="submit"
+                    name="register"
+                >
+                    Create Account
+                </button>
+
+            </form>
+
+            <p class="auth-switch">
+                Already have an account?
+                <a href="login.php">Sign in</a>
+            </p>
+
+        </section>
+
+    </main>
 
 </div>
 
 </body>
 </html>
-
-<!--
-===============================================================================
-CHANGES MADE TO THIS FILE
-===============================================================================
-
-1. Defined $errors, $full_name, and $email before processing the form.
-   Reason: Prevents undefined variable warnings when the page first opens.
-
-2. Changed the form check to:
-   $_SERVER["REQUEST_METHOD"] === "POST"
-   Reason: Detects every POST submission, including submitting with Enter.
-
-3. Added the null coalescing operator (??) when reading $_POST values.
-   Reason: Prevents "Undefined array key" warnings when a value is missing.
-
-4. Replaced the custom email regular expression with FILTER_VALIDATE_EMAIL.
-   Reason: The original regex rejected valid emails containing dots,
-   underscores, plus signs, or multiple domain sections.
-
-5. Moved the duplicate-email query after basic email validation.
-   Reason: There is no need to query the database when the email is empty
-   or invalid.
-
-6. Replaced rowCount() with fetch() when checking whether an email exists.
-   Reason: PDO rowCount() is unreliable for SELECT queries with MySQL.
-
-7. Selected only user_id instead of SELECT * when checking the email.
-   Reason: Only the user's existence is needed, so retrieving every column
-   is unnecessary.
-
-8. Added LIMIT 1 to the email query.
-   Reason: The query can stop after finding the first matching user.
-
-9. Separated confirm-password validation from password validation.
-   Reason: Both password and confirmation errors can now be detected and
-   displayed during the same request.
-
-10. Kept password_hash() before inserting the password.
-    Reason: The original password must never be stored directly.
-
-11. Added try/catch around the INSERT query.
-    Reason: Handles database errors and duplicate-email constraints safely.
-
-12. Preserved the user's full name and email after a validation error.
-    Reason: The user does not need to type those fields again.
-
-13. Did not preserve password values in the HTML.
-    Reason: Password fields should be cleared after an unsuccessful request.
-
-14. Escaped displayed values and error messages using htmlspecialchars().
-    Reason: Prevents HTML or JavaScript injection when output is displayed.
-
-15. Added lang, charset, viewport, autocomplete, minlength, and maxlength.
-    Reason: Improves HTML structure, mobile support, usability, and browser
-    validation.
-
-16. Redirected successful registration to:
-    login.php?registered=1
-    Reason: The login page can display a successful-registration message.
-
-IMPORTANT:
-The database column is currently named "password". It stores a hashed password,
-not the original password. If the database column is named "password_hash",
-change "password" to "password_hash" in both register.php and login.php.
-===============================================================================
--->

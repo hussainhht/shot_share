@@ -1,0 +1,103 @@
+/*
+ * Shot Share dark theme source
+ * Derived intentionally from the Golden Summer Fields hues; it is not a
+ * mechanical inversion of the light theme.
+ *
+ * This project has no Sass build pipeline. Keep this source synchronized with
+ * the browser-ready custom properties at the top of assets/css/style.css.
+ */
+
+/* Foundation palette */
+$tea-green-dark: #3a4030;
+$beige-dark: #2a2d1f;
+$cornsilk-dark: #1c1f16;
+$papaya-whip-dark: #4a3b24;
+$light-bronze-dark: #c98f5c;
+
+/* Reusable palette gradients; names are scoped to dark mode. */
+$gradient-dark-top: linear-gradient(
+    0deg,
+    $tea-green-dark,
+    $beige-dark,
+    $cornsilk-dark,
+    $papaya-whip-dark,
+    $light-bronze-dark
+);
+$gradient-dark-right: linear-gradient(
+    90deg,
+    $tea-green-dark,
+    $beige-dark,
+    $cornsilk-dark,
+    $papaya-whip-dark,
+    $light-bronze-dark
+);
+$gradient-dark-radial: radial-gradient(
+    circle,
+    $tea-green-dark 0%,
+    $beige-dark 58%,
+    $cornsilk-dark 100%
+);
+
+@mixin shot-share-dark-theme {
+    color-scheme: dark;
+
+    --palette-tea-green: #{$tea-green-dark};
+    --palette-beige: #{$beige-dark};
+    --palette-cornsilk: #{$cornsilk-dark};
+    --palette-papaya-whip: #{$papaya-whip-dark};
+    --palette-light-bronze: #{$light-bronze-dark};
+
+    --bg-page: #{$cornsilk-dark};
+    --bg-surface: #{$beige-dark};
+    --bg-surface-raised: #{$tea-green-dark};
+    --bg-surface-muted: #25291c;
+    --bg-nav: #22251a;
+    --bg-image: #25291c;
+    --bg-overlay: rgba(8, 10, 6, 0.72);
+
+    --text-primary: #f3f0e4;
+    --text-secondary: #d8d3bb;
+    --text-muted: #b8b097;
+
+    --accent: #{$light-bronze-dark};
+    --accent-hover: #d7a678;
+    --accent-active: #e5b985;
+    --accent-soft: #{$papaya-whip-dark};
+    --on-accent: #20150c;
+
+    --link: #e2aa76;
+    --link-hover: #f0c69d;
+
+    --border: #525944;
+    --border-soft: #{$tea-green-dark};
+    --border-strong: #768064;
+    --input-bg: #22251a;
+
+    --focus: #e2aa76;
+    --focus-ring: rgba(226, 170, 118, 0.32);
+
+    --danger: #f2a09a;
+    --danger-bg: #4a2925;
+    --danger-border: #9b5e58;
+    --on-danger: #24100e;
+
+    --success: #c1d6a1;
+    --success-bg: #293821;
+    --success-border: #667d52;
+    --on-success: #14200e;
+
+    --shadow-sm: 0 0.35rem 1rem rgba(0, 0, 0, 0.24);
+    --shadow-md: 0 1.25rem 3rem rgba(0, 0, 0, 0.38);
+    --selection-bg: #{$tea-green-dark};
+    --selection-text: #f3f0e4;
+}
+
+[data-theme="dark"] {
+    @include shot-share-dark-theme;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        @include shot-share-dark-theme;
+    }
+}
