@@ -6,10 +6,11 @@ $posts = [];
 $load_error = '';
 
 try {
-    $stmt = $conn->prepare("
+  $stmt = $conn->prepare("
         SELECT
             p.post_id,
             p.user_id,
+            p.title,
             p.post_text,
             p.image_path,
             p.created_at,
@@ -95,20 +96,27 @@ try {
 
                     </header>
 
-                    <div class="post-content">
+                   <div class="post-content">
 
-                        <p>
-                            <?= nl2br(
-                                htmlspecialchars(
-                                    $post['post_text'],
-                                    ENT_QUOTES,
-                                    'UTF-8'
-                                )
-                            ) ?>
-                        </p>
+    <h3 class="post-title">
+        <?= htmlspecialchars(
+            $post['title'],
+            ENT_QUOTES,
+            'UTF-8'
+        ) ?>
+    </h3>
 
-                    </div>
+    <p>
+        <?= nl2br(
+            htmlspecialchars(
+                $post['post_text'],
+                ENT_QUOTES,
+                'UTF-8'
+            )
+        ) ?>
+    </p>
 
+</div>
                     <?php if (!empty($post['image_path'])): ?>
 
                         <div class="post-image">

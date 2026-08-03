@@ -4,6 +4,7 @@ require_once __DIR__ . '/../database/db_connect.php';
 
 $errors = [];
 $success = '';
+$title = '';
 $post_text = '';
 $image_path = null;
 
@@ -23,8 +24,21 @@ if (!isset($_SESSION['user_id'])) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
+    $title = trim($_POST['title'] ?? '');
     $post_text = trim($_POST['post_text'] ?? '');
     $user_id = (int) $_SESSION['user_id'];
+
+    /*
+    |--------------------------------------------------------------------------
+    | Validate title
+    |--------------------------------------------------------------------------
+    */
+
+    if ($title === '') {
+        $errors[] = 'Title cannot be empty.';
+    } elseif (mb_strlen($title) > 255) {
+        $errors[] = 'Title cannot exceed 255 characters.';
+    }
 
     /*
     |--------------------------------------------------------------------------
@@ -64,8 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             /*
              * Detect the real MIME type from the uploaded file.
-             * Do not trust $_FILES["image"]["type"] because the user
-             * can manipulate that value.
+             * Do not trust $_FILES["image"]["type"].
              */
             if (empty($errors)) {
                 $file_info = new finfo(FILEINFO_MIME_TYPE);
@@ -154,26 +167,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $conn->prepare(
                 'INSERT INTO posts (
                     user_id,
+                    title,
                     post_text,
                     image_path
                 )
-                VALUES (?, ?, ?)'
+                VALUES (?, ?, ?, ?)'
             );
 
             $stmt->execute([
                 $user_id,
+                $title,
                 $post_text,
                 $image_path
             ]);
 
             $success = 'Post created successfully.';
+            $title = '';
             $post_text = '';
+            $image_path = null;
 
         } catch (PDOException $e) {
 
             /*
-             * Remove the uploaded image when database insertion fails,
-             * otherwise an unused image remains on the server.
+             * Remove the uploaded image when database insertion fails.
              */
             if ($image_path !== null) {
                 $uploaded_file =
@@ -202,7 +218,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <?php foreach ($errors as $error): ?>
 
-                <p style="color: red;">
+                <p>
                     <?= htmlspecialchars(
                         $error,
                         ENT_QUOTES,
@@ -235,11 +251,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     >
 
         <div>
+            <label for="title">
+                Title
+            </label>
+
+            <input
+                type="text"
+                id="title"
+                name="title"
+                maxlength="255"
+                required
+                value="<?= htmlspecialchars(
+                    $title,
+                    ENT_QUOTES,
+                    'UTF-8'
+                ) ?>"
+            >
+        </div>
+
+        <div>
             <label for="post_text">
                 Post Text
             </label>
-
-            <br>
 
             <textarea
                 id="post_text"
@@ -255,14 +288,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ) ?></textarea>
         </div>
 
-        <br>
-
         <div>
             <label for="image-input">
                 Image (JPG, JPEG, PNG — maximum 2MB)
             </label>
-
-            <br>
 
             <input
                 type="file"
@@ -270,8 +299,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 id="image-input"
                 accept=".jpg,.jpeg,.png,image/jpeg,image/png"
             >
-
-            <br><br>
 
             <img
                 id="image-preview"
@@ -283,8 +310,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 "
             >
         </div>
-
-        <br>
 
         <button type="submit">
             Create

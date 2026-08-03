@@ -21,6 +21,7 @@ $stmt = $conn->prepare("
     SELECT
         p.post_id,
         p.user_id,
+        p.title,
         p.post_text,
         p.image_path,
         p.created_at,
@@ -43,7 +44,13 @@ if (!$post) {
 ?>
 <section class="post-details">
 
-    <h1>Post Details</h1>
+    <h1>
+        <?= htmlspecialchars(
+            $post['title'],
+            ENT_QUOTES,
+            'UTF-8'
+        ) ?>
+    </h1>
 
     <p>
         <strong>Author:</strong>
