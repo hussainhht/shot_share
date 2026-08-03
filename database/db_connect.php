@@ -1,17 +1,29 @@
 <?php
-$host = "localhost";
-$user = "root"; 
-$password = ""; 
-$database = "shot_share";
+
+$host = 'localhost';
+$database = 'shot_share';
+$user = 'root';
+$db_password = '';
+
+$dsn = "mysql:host=$host;dbname=$database;charset=utf8mb4";
+
+$options = [
+    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    PDO::ATTR_EMULATE_PREPARES => false
+];
 
 try {
-    $conn = new PDO("mysql:host=$host;dbname=$database", $user, $password);
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
-
+    $conn = new PDO(
+        $dsn,
+        $user,
+        $db_password,
+        $options
+    );
 
 } catch (PDOException $e) {
-    // Output if fail
-    die("Connection failed: " . $e->getMessage());
+    die(
+        'Database connection failed: ' .
+        $e->getMessage()
+    );
 }
-?>
