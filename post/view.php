@@ -6,7 +6,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 require_once __DIR__ . '/../database/db_connect.php';
 
-
+// 1) قراءة رقم البوست من الـ GET
 $post_id = filter_input(INPUT_GET, 'post_id', FILTER_VALIDATE_INT);
 
 if (!$post_id || $post_id <= 0) {
@@ -15,6 +15,7 @@ if (!$post_id || $post_id <= 0) {
     return;
 }
 
+// 2) جلب البوست مع صاحب البوست
 $post_stmt = $conn->prepare("
     SELECT 
         p.post_id,
@@ -39,7 +40,7 @@ if (!$post) {
     return;
 }
 
-
+// 3) جلب التعليقات الخاصة بهذا البوست
 $comments_stmt = $conn->prepare("
     SELECT
         c.comment_id,
@@ -54,6 +55,33 @@ $comments_stmt = $conn->prepare("
 ");
 $comments_stmt->execute([$post_id]);
 $comments = $comments_stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// 4) جلب عدد اللايكات + هل المستخدم الحالي عامل لايك
+$likes_count_stmt = $conn->prepare(
+    'SELECT COUNT(*) AS like_count
+     FROM likes
+     WHERE post_id = ?'
+);
+$likes_count_stmt->execute([$post_id]);
+$likes_row = $likes_count_stmt->fetch(PDO::FETCH_ASSOC);
+$likes_count = (int) ($likes_row['like_count'] ?? 0);
+
+$user_liked = false;
+
+if (isset($_SESSION['user_id'])) {
+    $like_check_stmt = $conn->prepare(
+        'SELECT like_id
+         FROM likes
+         WHERE post_id = ?
+           AND user_id = ?
+         LIMIT 1'
+    );
+    $like_check_stmt->execute([
+        $post_id,
+        (int) $_SESSION['user_id']
+    ]);
+    $user_liked = (bool) $like_check_stmt->fetch(PDO::FETCH_ASSOC);
+}
 
 ?>
 
@@ -133,7 +161,34 @@ $comments = $comments_stmt->fetchAll(PDO::FETCH_ASSOC);
         </form>
     <?php endif; ?>
 
-   
+    <!-- قسم اللايكات -->
+    <div class="post-likes">
+        <p class="post-meta">
+            <?= $likes_count ?> like<?= $likes_count === 1 ? '' : 's' ?>
+        </p>
+
+        <?php if (isset($_SESSION['user_id'])): ?>
+            <form
+                method="post"
+                action="post/like.php"
+            >
+                <input
+                    type="hidden"
+                    name="post_id"
+                    value="<?= (int) $post['post_id'] ?>"
+                >
+
+                <button
+                    type="submit"
+                    class="<?= $user_liked ? 'button-secondary' : '' ?>"
+                >
+                    <?= $user_liked ? 'Unlike' : 'Like' ?>
+                </button>
+            </form>
+        <?php endif; ?>
+    </div>
+
+    <!-- قسم التعليقات -->
     <div class="post-comments">
         <h2>Comments</h2>
 
@@ -174,7 +229,7 @@ $comments = $comments_stmt->fetchAll(PDO::FETCH_ASSOC);
         <?php endif; ?>
     </div>
 
-    
+    <!-- نموذج إضافة تعليق -->
     <?php if (isset($_SESSION['user_id'])): ?>
         <div class="post-add-comment">
             <h3>Add a comment</h3>
