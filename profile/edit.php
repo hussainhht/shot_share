@@ -1,5 +1,7 @@
 <?php
 
+ob_start();
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -164,10 +166,6 @@ if (isset($_POST['save_changes'])) {
 
             $_SESSION['full_name'] = $new_name;
             $_SESSION['username'] = $new_username;
-            
-
-            header("Location: ../auth/login.php");
-            exit();
 
         } else {
 
