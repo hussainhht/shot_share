@@ -1,261 +1,225 @@
 <?php
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-// require_once __DIR__ . "/../database/db_connect.php";
-$searchQuery = "";
+require_once __DIR__ . '/../database/db_connect.php';
+
 $posts = [];
-$errorMessage = "";
+$errorMessage = '';
 
-if (isset($_GET["q"])) {
-    $searchQuery = trim($_GET["q"]);
+try {
+    $statement = $conn->prepare(
+        'SELECT
+            p.post_id,
+            p.title,
+            p.post_text,
+            p.image_path,
+            p.created_at,
+            u.username,
+            u.full_name
+        FROM posts AS p
+        INNER JOIN users AS u
+            ON p.user_id = u.user_id
+        ORDER BY p.created_at DESC'
+    );
+
+    $statement->execute();
+    $posts = $statement->fetchAll(PDO::FETCH_ASSOC);
+
+} catch (PDOException $error) {
+    $errorMessage = 'Something went wrong while loading posts.';
+    error_log($error->getMessage());
 }
 
-if ($searchQuery !== "") {
-    $searchPattern = "%" . $searchQuery . "%";
-
-    $sql = "
-        SELECT
-            posts.id,
-            posts.title,
-            posts.content,
-            posts.image,
-            posts.created_at,
-            users.username
-        FROM posts
-        INNER JOIN users
-            ON posts.user_id = users.id
-        WHERE posts.title LIKE ?
-           OR posts.content LIKE ?
-           OR users.username LIKE ?
-        ORDER BY posts.created_at DESC
-        LIMIT 50
-    ";
-
-    $statement = $conn->prepare($sql);
-
-    if ($statement) {
-        $statement->bind_param(
-            "sss",
-            $searchPattern,
-            $searchPattern,
-            $searchPattern
-        );
-
-        $statement->execute();
-
-        $result = $statement->get_result();
-
-        while ($row = $result->fetch_assoc()) {
-            $posts[] = $row;
-        }
-
-        $statement->close();
-    } else {
-        $errorMessage = "Something went wrong while searching.";
-    }
-}
-
-function escapeOutput($value)
+function escapeOutput($value): string
 {
     return htmlspecialchars(
-        $value ?? "",
+        (string) ($value ?? ''),
         ENT_QUOTES,
-        "UTF-8"
+        'UTF-8'
     );
 }
 
-function shortenContent($content, $length = 180)
+function shortenContent($content, int $length = 180): string
 {
-    $content = strip_tags($content);
+    $content = strip_tags((string) $content);
 
-    if (mb_strlen($content) <= $length) {
+    if (mb_strlen($content, 'UTF-8') <= $length) {
         return $content;
     }
 
-    return mb_substr($content, 0, $length) . "...";
+    return mb_substr($content, 0, $length, 'UTF-8') . '...';
 }
 
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
+<section class="search-page">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <header class="search-header">
+        <h1 class="search-title">Search Posts</h1>
 
-    <title>Search Posts | Shot Share</title>
+        <p class="search-description">
+            Search by title, post text, username, or full name.
+        </p>
+    </header>
 
-    <link
-        rel="stylesheet"
-        href="../assets/css/style.css"
-    >
+    <div class="search-form" role="search">
+        <label for="search-input" class="visually-hidden">
+            Search posts
+        </label>
 
-</head>
-
-<body>
-
-<div class="app-layout">
-
-    <main class="search-page">
-
-        <header class="search-header">
-            <h2 class="search-title">Search Posts</h2>
-
-            <p class="search-description">
-                Search by post title, post content, or username.
-            </p>
-        </header>
-
-        <form
-            class="search-form"
-            action="search.php"
-            method="GET"
-        >
-            <label
-                for="search-input"
-                hidden
-            >
-                Search posts
-            </label>
-
+        <div class="search-input-wrapper">
             <input
                 class="search-input"
                 id="search-input"
                 type="search"
-                name="q"
-                placeholder="Search for posts..."
-                value="<?= escapeOutput($searchQuery) ?>"
+                placeholder="Search posts..."
                 autocomplete="off"
+                aria-controls="search-results"
             >
 
             <button
-                class="search-button"
-                type="submit"
+                class="search-clear"
+                id="search-clear"
+                type="button"
+                aria-label="Clear search"
+                title="Clear search"
+                hidden
             >
-                Search
+                &times;
             </button>
-        </form>
+        </div>
+    </div>
 
-        <?php if ($errorMessage !== ""): ?>
+    <?php if ($errorMessage !== ''): ?>
 
-            <div class="error-message">
-                <?= escapeOutput($errorMessage) ?>
-            </div>
+        <div class="error-message" role="alert">
+            <?= escapeOutput($errorMessage) ?>
+        </div>
 
-        <?php elseif ($searchQuery === ""): ?>
+    <?php elseif (empty($posts)): ?>
 
-            <section class="empty-state">
-                <h2>What are you looking for?</h2>
+        <section class="empty-state">
+            <h2>No posts yet</h2>
+            <p>Posts will appear here when users create them.</p>
+        </section>
 
-                <p>
-                    Enter a title, keyword, or username in the search box.
-                </p>
-            </section>
+    <?php else: ?>
 
-        <?php elseif (count($posts) === 0): ?>
+        <p
+            class="search-information"
+            id="search-information"
+            aria-live="polite"
+        >
+            <span id="result-prefix">Showing</span>
+            <strong id="result-count"><?= count($posts) ?></strong>
+            <span id="result-label">
+                <?= count($posts) === 1 ? 'post' : 'posts' ?>
+            </span>
+        </p>
 
-            <section class="empty-state">
-                <h2>No results found</h2>
+        <section class="search-results" id="search-results">
 
-                <p>
-                    We could not find any posts matching
-                    “<?= escapeOutput($searchQuery) ?>”.
-                </p>
-            </section>
+            <?php foreach ($posts as $post): ?>
 
-        <?php else: ?>
+                <?php
+                $searchData = implode(
+                    ' ',
+                    [
+                        $post['title'],
+                        $post['post_text'],
+                        $post['username'],
+                        $post['full_name']
+                    ]
+                );
+                ?>
 
-            <p class="search-information">
-                Found
-                <strong><?= count($posts) ?></strong>
-                result<?= count($posts) === 1 ? "" : "s" ?>
-                for
-                “<?= escapeOutput($searchQuery) ?>”
-            </p>
+                <article
+                    class="post-card search-post"
+                    data-search="<?= escapeOutput($searchData) ?>"
+                >
+                    <div class="post-image-wrapper">
 
-            <section class="search-results">
+                        <?php if (!empty($post['image_path'])): ?>
 
-                <?php foreach ($posts as $post): ?>
+                            <img
+                                class="post-image"
+                                src="<?= escapeOutput($post['image_path']) ?>"
+                                alt="Image attached to <?= escapeOutput($post['title']) ?>"
+                                loading="lazy"
+                            >
 
-                    <article class="post-card">
+                        <?php else: ?>
 
-                        <div class="post-image-wrapper">
-
-                            <?php if (!empty($post["image"])): ?>
-
-                                <img
-                                    class="post-image"
-                                    src="../uploads/posts/<?= escapeOutput($post["image"]) ?>"
-                                    alt="<?= escapeOutput($post["title"]) ?>"
-                                >
-
-                            <?php else: ?>
-
-                                <div class="post-image-placeholder">
-                                    No image
-                                </div>
-
-                            <?php endif; ?>
-
-                        </div>
-
-                        <div class="post-content">
-
-                            <h2 class="post-title">
-                                <a
-                                    href="../post/view.php?id=<?= (int) $post["id"] ?>"
-                                >
-                                    <?= escapeOutput($post["title"]) ?>
-                                </a>
-                            </h2>
-
-                            <div class="post-meta">
-                                Posted by
-                                <?= escapeOutput($post["username"]) ?>
-
-                                <?php if (!empty($post["created_at"])): ?>
-                                    ·
-                                    <?= escapeOutput(
-                                        date(
-                                            "F j, Y",
-                                            strtotime($post["created_at"])
-                                        )
-                                    ) ?>
-                                <?php endif; ?>
+                            <div class="post-image-placeholder">
+                                No image
                             </div>
 
-                            <p class="post-description">
-                                <?= escapeOutput(
-                                    shortenContent($post["content"])
-                                ) ?>
-                            </p>
+                        <?php endif; ?>
 
+                    </div>
+
+                    <div class="post-content">
+                        <h2 class="post-title">
                             <a
-                                class="view-post-link"
-                                href="../post/view.php?id=<?= (int) $post["id"] ?>"
+                                href="index.php?page=view-post&id=<?= (int) $post['post_id'] ?>"
                             >
-                                View post →
+                                <?= escapeOutput($post['title']) ?>
                             </a>
+                        </h2>
 
+                        <div class="post-meta">
+                            <strong>
+                                <?= escapeOutput($post['full_name']) ?>
+                            </strong>
+
+                            <span>
+                                @<?= escapeOutput($post['username']) ?>
+                            </span>
+
+                            <?php if (!empty($post['created_at'])): ?>
+                                <span aria-hidden="true">&middot;</span>
+
+                                <time datetime="<?= escapeOutput($post['created_at']) ?>">
+                                    <?= escapeOutput(
+                                        date(
+                                            'F j, Y',
+                                            strtotime($post['created_at'])
+                                        )
+                                    ) ?>
+                                </time>
+                            <?php endif; ?>
                         </div>
 
-                    </article>
+                        <p class="post-description">
+                            <?= escapeOutput(
+                                shortenContent($post['post_text'])
+                            ) ?>
+                        </p>
 
-                <?php endforeach; ?>
+                        <a
+                            class="view-post-link"
+                            href="index.php?page=view-post&id=<?= (int) $post['post_id'] ?>"
+                        >
+                            View post &rarr;
+                        </a>
+                    </div>
+                </article>
 
-            </section>
+            <?php endforeach; ?>
 
-        <?php endif; ?>
+        </section>
 
-    </main>
+        <section
+            class="empty-state search-no-results"
+            id="no-search-results"
+            aria-live="polite"
+            hidden
+        >
+            <h2>No results found</h2>
+            <p>Try another keyword.</p>
+        </section>
 
-</div>
+    <?php endif; ?>
 
-</body>
-</html>
+</section>
+
+<script src="assets/js/search.js?v=5"></script>

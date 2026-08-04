@@ -1,5 +1,5 @@
-(() => {
-  "use strict";
+function initialiseInterface() {
+
 
   const root = document.documentElement;
   const themeStorageKey = "shot-share-theme";
@@ -119,4 +119,6 @@
   } else {
     initialiseInterface();
   }
-})();
+};
+
+initialiseInterface();

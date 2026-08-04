@@ -1,5 +1,4 @@
-(() => {
-  "use strict";
+function Load() {
 
   const page = document.getElementById("cats-page");
 
@@ -23,28 +22,28 @@
 
     return fallback;
   };
-
-  const initialLimit = readLimit(page.dataset.initialLimit, 12);
-  const moreLimit = readLimit(page.dataset.moreLimit, 10);
+ 
+  const initialLimit = readLimit(page.dataset.initialLimit, 12); 
+  const moreLimit = readLimit(page.dataset.moreLimit, 10); 
   let isLoading = false;
 
-  const removeTemporaryStates = () => {
+  const removeTemporaryStates = () => { 
     gallery
       .querySelectorAll("[data-cats-temporary]")
       .forEach((element) => element.remove());
   };
 
-  const hasCatCards = () => Boolean(gallery.querySelector(".cat-card"));
+  const hasCatCards = () => Boolean(gallery.querySelector(".cat-card")); 
 
-  const updateControls = () => {
+  const updateControls = () => { 
     refreshButton.disabled = isLoading;
     loadMoreButton.disabled = isLoading || !hasCatCards();
     loadMoreButton.textContent = isLoading
       ? "Loading..."
       : "Load More Cats";
-  };
+  }; 
 
-  const createSkeleton = () => {
+  const createSkeleton = () => { //this function creates a skeleton placeholder for cat cards while loading
     const skeleton = document.createElement("div");
     skeleton.className = "cat-card cat-card-skeleton";
     skeleton.dataset.catsTemporary = "true";
@@ -64,7 +63,7 @@
       removeTemporaryStates();
     }
 
-    const fragment = document.createDocumentFragment();
+    const fragment = document.createDocumentFragment(); // this fragment will hold the skeletons to be added to the gallery
 
     for (let index = 0; index < count; index += 1) {
       fragment.append(createSkeleton());
@@ -105,7 +104,7 @@
       image.height = cat.height;
     }
 
-    const revealImage = () => {
+    const revealImage = () => { // this function reveals the image once it has loaded successfully
       figure.classList.remove("is-loading");
       figure.classList.add("is-loaded");
       imageLoader.remove();
@@ -126,10 +125,9 @@
         fallback.textContent = "Image unavailable";
         imageFrame.append(fallback);
       },
-      { once: true },
     );
 
-    imageFrame.append(imageLoader, image);
+    imageFrame.append(imageLoader, image); 
     figure.append(imageFrame);
 
     if (image.complete && image.naturalWidth > 0) {
@@ -159,7 +157,7 @@
     removeTemporaryStates();
 
     if (replace) {
-      gallery.replaceChildren();
+      gallery.replaceChildren(); 
     }
 
     const errorState = document.createElement("div");
@@ -199,7 +197,6 @@
 
       const response = await fetch(requestUrl, {
         method: "GET",
-        credentials: "same-origin",
         headers: {
           Accept: "application/json",
         },
@@ -240,4 +237,6 @@
   });
 
   loadCats({ replace: true, limit: initialLimit });
-})();
+};
+
+Load();

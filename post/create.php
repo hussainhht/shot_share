@@ -181,6 +181,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $image_path
             ]);
 
+            $updateUser = $conn->prepare(
+                "UPDATE users 
+                SET has_created_post = 1 
+                WHERE user_id = ?"
+            );
+
+            $updateUser->execute([$user_id]);
+
             $success = 'Post created successfully.';
             $title = '';
             $post_text = '';
@@ -244,29 +252,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <?php endif; ?>
 
-    <form
-        method="post"
-        action="index.php?page=create-post"
-        enctype="multipart/form-data"
-    >
+    <form method="post" action="index.php?page=create-post" enctype="multipart/form-data">
 
         <div>
             <label for="title">
                 Title
             </label>
 
-            <input
-                type="text"
-                id="title"
-                name="title"
-                maxlength="255"
-                required
-                value="<?= htmlspecialchars(
-                    $title,
-                    ENT_QUOTES,
-                    'UTF-8'
-                ) ?>"
-            >
+            <input type="text" id="title" name="title" maxlength="255" required value="<?= htmlspecialchars(
+                $title,
+                ENT_QUOTES,
+                'UTF-8'
+            ) ?>">
         </div>
 
         <div>
@@ -274,14 +271,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 Post Text
             </label>
 
-            <textarea
-                id="post_text"
-                name="post_text"
-                rows="5"
-                cols="40"
-                maxlength="2000"
-                required
-            ><?= htmlspecialchars(
+            <textarea id="post_text" name="post_text" rows="5" cols="40" maxlength="2000" required><?= htmlspecialchars(
                 $post_text,
                 ENT_QUOTES,
                 'UTF-8'
@@ -293,22 +283,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 Image (JPG, JPEG, PNG — maximum 2MB)
             </label>
 
-            <input
-                type="file"
-                name="image"
-                id="image-input"
-                accept=".jpg,.jpeg,.png,image/jpeg,image/png"
-            >
+            <input type="file" name="image" id="image-input" accept=".jpg,.jpeg,.png,image/jpeg,image/png">
 
-            <img
-                id="image-preview"
-                alt="Selected image preview"
-                style="
+            <img id="image-preview" alt="Selected image preview" style="
                     display: none;
                     max-width: 200px;
                     height: auto;
-                "
-            >
+                ">
         </div>
 
         <button type="submit">

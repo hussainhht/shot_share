@@ -1,18 +1,12 @@
 <?php
 
-declare(strict_types=1);
 
 session_start();
 
 header('Content-Type: application/json; charset=UTF-8');
 header('Cache-Control: no-store');
-header('X-Content-Type-Options: nosniff');
 
-/**
- * Send one safe JSON response and stop execution.
- *
- * @param array<string, mixed> $payload
- */
+
 function send_json_response(int $status, array $payload): void
 {
     http_response_code($status);
@@ -25,6 +19,8 @@ function send_json_response(int $status, array $payload): void
     exit;
 }
 
+
+
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     header('Allow: GET');
     send_json_response(405, ['message' => 'Method not allowed.']);
@@ -34,8 +30,6 @@ if (!isset($_SESSION['user_id'])) {
     send_json_response(401, ['message' => 'Authentication required.']);
 }
 
-// Release the session lock before waiting for the upstream image service.
-session_write_close();
 
 $limit = 12;
 
@@ -64,7 +58,7 @@ if (isset($_GET['limit'])) {
 $query = http_build_query([
     'limit' => $limit,
     'size' => 'med',
-    'mime_types' => 'jpg,png',
+    'mime_types' => 'jpg,png,gif',
     'format' => 'json',
     'order' => 'RANDOM'
 ]);
@@ -72,16 +66,12 @@ $query = http_build_query([
 $request_url = 'https://api.thecatapi.com/v1/images/search?' . $query;
 $request_headers = [
     'Accept: application/json',
-    'User-Agent: Shot-Share/1.0'
 ];
 
-// The public image search currently works without a key. If a server-side
-// CAT_API_KEY is configured, it is added only to the outgoing request.
-$api_key = trim((string) getenv('CAT_API_KEY'));
 
-if ($api_key !== '' && !preg_match('/[\r\n]/', $api_key)) {
-    $request_headers[] = 'x-api-key: ' . $api_key;
-}
+$api_key = 'live_0ep0Hqwg6sEzfvt9jMWw3rymwETfMawjZRF3TCkO9qiPdYwD4DOq7N7Q5AQicQGi';
+$request_headers[] = 'x-api-key: ' . $api_key;
+
 
 try {
     $curl = curl_init($request_url);
@@ -93,19 +83,16 @@ try {
     curl_setopt_array(
         $curl,
         [
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HTTPHEADER => $request_headers,
-            CURLOPT_CONNECTTIMEOUT => 5,
-            CURLOPT_TIMEOUT => 15,
-            CURLOPT_FOLLOWLOCATION => false,
-            CURLOPT_SSL_VERIFYPEER => true,
-            CURLOPT_SSL_VERIFYHOST => 2
+            CURLOPT_RETURNTRANSFER => true, // Return the response as a string
+            CURLOPT_HTTPHEADER => $request_headers, // Set request headers
+            CURLOPT_CONNECTTIMEOUT => 5, // 5 seconds to connect
+            CURLOPT_TIMEOUT => 15,// 15 seconds for the entire request
         ]
     );
 
-    $response_body = curl_exec($curl);
-    $response_status = (int) curl_getinfo($curl, CURLINFO_RESPONSE_CODE);
-    $curl_error = curl_error($curl);
+    $response_body = curl_exec($curl); // Execute the request and get the response body
+    $response_status = (int) curl_getinfo($curl, CURLINFO_RESPONSE_CODE); // Get the HTTP status code
+    $curl_error = curl_error($curl); // Get any cURL error message
 
     curl_close($curl);
 
@@ -122,10 +109,10 @@ try {
     }
 
     $upstream_cats = json_decode(
-        $response_body,
-        true,
-        512,
-        JSON_THROW_ON_ERROR
+        $response_body, // Decode the JSON response
+        true, // Decode as associative array
+        512, // Maximum depth
+        JSON_THROW_ON_ERROR // Throw exception on JSON errors
     );
 
     if (!is_array($upstream_cats)) {
@@ -148,20 +135,15 @@ try {
             continue;
         }
 
-        $scheme = strtolower((string) parse_url($image_url, PHP_URL_SCHEME));
 
-        if ($scheme !== 'https') {
-            continue;
-        }
-
-        $cat = [
+        $cat = [ // Create a new cat array with validated and sanitized data
             'id' => substr((string) ($upstream_cat['id'] ?? ''), 0, 100),
             'url' => $image_url,
-            'width' => max(0, (int) ($upstream_cat['width'] ?? 0)),
-            'height' => max(0, (int) ($upstream_cat['height'] ?? 0))
+            'width' => max(0, (int) ($upstream_cat['width'] ?? 0)), // Validate and sanitize width
+            'height' => max(0, (int) ($upstream_cat['height'] ?? 0)) // Validate and sanitize height
         ];
 
-        $breed = $upstream_cat['breeds'][0] ?? null;
+        $breed = $upstream_cat['breeds'][0] ?? null;  // Get the first breed if available
 
         if (is_array($breed) && !empty($breed['name'])) {
             $cat['breed'] = [
