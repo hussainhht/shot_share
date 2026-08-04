@@ -1,4 +1,3 @@
-
 <?php
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -56,6 +55,32 @@ try {
             VALUES (?, ?)'
         );
         $insert->execute([$post_id, $user_id]);
+    }
+    $stmt = $conn->prepare(
+        "SELECT user_id
+     FROM posts
+     WHERE post_id = ?"
+    );
+
+    $stmt->execute([$post_id]);
+
+    $postOwner = $stmt->fetch(PDO::FETCH_ASSOC);
+    $owner_id = $postOwner['user_id'];
+    $actor_id = $_SESSION['user_id'];
+
+    if ($owner_id != $actor_id) {
+
+        $notification = $conn->prepare(
+            "INSERT INTO notifications
+        (user_id, actor_id, post_id, type)
+        VALUES (?, ?, ?, 'like')"
+        );
+
+        $notification->execute([
+            $owner_id,
+            $actor_id,
+            $post_id
+        ]);
     }
 
     header('Location: ../index.php?page=view-post&post_id=' . (int) $post_id);

@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS users (
     full_name VARCHAR(100) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
+    has_created_post TINYINT(1) NOT NULL DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
@@ -65,3 +66,34 @@ CREATE TABLE IF NOT EXISTS likes (
         ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
+CREATE TABLE IF NOT EXISTS notifications (
+    notification_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+
+    user_id INT UNSIGNED NOT NULL,
+    actor_id INT UNSIGNED NOT NULL,
+    post_id INT UNSIGNED NOT NULL,
+
+    type ENUM('like', 'comment') NOT NULL,
+
+    comment_id INT UNSIGNED DEFAULT NULL,
+
+    is_read TINYINT(1) NOT NULL DEFAULT 0,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id)
+        REFERENCES users(user_id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (actor_id)
+        REFERENCES users(user_id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (post_id)
+        REFERENCES posts(post_id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (comment_id)
+        REFERENCES comments(comment_id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB;

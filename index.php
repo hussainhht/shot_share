@@ -43,7 +43,8 @@ $routes = [
     'profile_edit' => __DIR__ . '/profile/edit.php',
     'search' => __DIR__ . '/pages/search.php',
     'cats' => __DIR__ . '/pages/cat.php',
-    'view-post' => __DIR__ . '/post/view.php'
+    'view-post' => __DIR__ . '/post/view.php',
+    'inbox' => __DIR__ . '/pages/inbox.php'
 ];
 
 // Select page file
