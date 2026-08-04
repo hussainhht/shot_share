@@ -172,13 +172,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
 
-            // $errors[] =
-            //     'Failed to create the post. Please try again.';
+            $errors[] =
+                'Failed to create the post. Please try again.';
 
-            error_log(
-                'Database error while creating post: ' .
-                $e->getMessage()
-            );
+            // error_log(
+            //     'Database error while creating post: ' .
+            //     $e->getMessage()
+            // );
         }
     }
 }

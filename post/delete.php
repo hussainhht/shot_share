@@ -4,11 +4,7 @@ session_start();
 
 require_once __DIR__ . '/../database/db_connect.php';
 
-/*
-|--------------------------------------------------------------------------
-| Check whether the user is logged in
-|--------------------------------------------------------------------------
-*/
+
 
 if (!isset($_SESSION['user_id'])) {
     header('Location: ../auth/login.php');
@@ -16,11 +12,7 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-/*
-|--------------------------------------------------------------------------
-| Allow POST requests only
-|--------------------------------------------------------------------------
-*/
+
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: ../index.php?page=home');
@@ -28,11 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-/*
-|--------------------------------------------------------------------------
-| Validate the post ID
-|--------------------------------------------------------------------------
-*/
+
 
 $post_id = filter_input(
     INPUT_POST,
@@ -72,14 +60,7 @@ try {
         exit('Post not found or you are not allowed to delete it.');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Delete the post from the database
-    |--------------------------------------------------------------------------
-    |
-    | user_id is checked again during deletion for extra protection.
-    |
-    */
+
 
     $delete = $conn->prepare(
         'DELETE FROM posts
@@ -96,15 +77,7 @@ try {
         throw new RuntimeException('The post could not be deleted.');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Delete the post image
-    |--------------------------------------------------------------------------
-    |
-    | The database record is deleted first.
-    | If deleting the image fails, the website will not contain a broken post.
-    |
-    */
+
 
     if (!empty($post['image_path'])) {
 
@@ -124,11 +97,7 @@ try {
         }
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Redirect to home
-    |--------------------------------------------------------------------------
-    */
+
 
     header(
         'Location: ../index.php?page=home&msg=post_deleted'

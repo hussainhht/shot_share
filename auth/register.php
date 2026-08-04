@@ -14,11 +14,6 @@ $email = "";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
-    /*
-    |--------------------------------------------------------------------------
-    | Get form values
-    |--------------------------------------------------------------------------
-    */
 
     $full_name = trim($_POST["full_name"] ?? "");
     $username = trim($_POST["username"] ?? "");
@@ -28,11 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $confirm_password = $_POST["confirm_password"] ?? "";
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Validate full name
-    |--------------------------------------------------------------------------
-    */
+
 
     if ($full_name === "") {
 
@@ -134,11 +125,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Check if email already exists
-    |--------------------------------------------------------------------------
-    */
 
     if (
         $email !== "" &&
@@ -167,11 +153,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Validate password
-    |--------------------------------------------------------------------------
-    */
 
     $password_pattern =
         "/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@#$!%*_?&])[A-Za-z\d@#$!%*_?&]{8,20}$/";
@@ -196,11 +177,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Validate password confirmation
-    |--------------------------------------------------------------------------
-    */
+
 
     if ($confirm_password === "") {
 
@@ -214,18 +191,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Create account
-    |--------------------------------------------------------------------------
-    */
-
+    
     if (empty($errors)) {
 
-        $hashed_password = password_hash(
-            $password,
-            PASSWORD_DEFAULT
-        );
+        $hashed_password = password_hash( $password, PASSWORD_DEFAULT );
 
 
         try {
@@ -258,11 +227,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         } catch (PDOException $error) {
 
-            /*
-             * This protects against duplicate values
-             * even if two registrations happen at
-             * nearly the same time.
-             */
+
 
             if ($error->getCode() === "23000") {
 
