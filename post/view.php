@@ -6,7 +6,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 require_once __DIR__ . '/../database/db_connect.php';
 
-// 1) قراءة رقم البوست من الـ GET
+// Read the post ID from the request.
 $post_id = filter_input(INPUT_GET, 'post_id', FILTER_VALIDATE_INT);
 
 if (!$post_id || $post_id <= 0) {
@@ -15,7 +15,7 @@ if (!$post_id || $post_id <= 0) {
     return;
 }
 
-// 2) جلب البوست مع صاحب البوست
+// Load the post and its author.
 $post_stmt = $conn->prepare("
     SELECT 
         p.post_id,
@@ -40,7 +40,7 @@ if (!$post) {
     return;
 }
 
-// 3) جلب التعليقات الخاصة بهذا البوست
+// Load comments for the post.
 $comments_stmt = $conn->prepare("
     SELECT
         c.comment_id,
@@ -56,7 +56,7 @@ $comments_stmt = $conn->prepare("
 $comments_stmt->execute([$post_id]);
 $comments = $comments_stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// 4) جلب عدد اللايكات + هل المستخدم الحالي عامل لايك
+// Load the like count and the current user's like state.
 $likes_count_stmt = $conn->prepare(
     'SELECT COUNT(*) AS like_count
      FROM likes
@@ -83,40 +83,104 @@ if (isset($_SESSION['user_id'])) {
     $user_liked = (bool) $like_check_stmt->fetch(PDO::FETCH_ASSOC);
 }
 
+// Presentation-only helpers for avatar initials and readable dates.
+$build_initials = static function (string $name): string {
+    $name_parts = preg_split(
+        '/\s+/u',
+        trim($name),
+        -1,
+        PREG_SPLIT_NO_EMPTY
+    );
+
+    if (empty($name_parts)) {
+        return 'SS';
+    }
+
+    $initials = mb_substr($name_parts[0], 0, 1, 'UTF-8');
+
+    if (count($name_parts) > 1) {
+        $initials .= mb_substr(
+            $name_parts[count($name_parts) - 1],
+            0,
+            1,
+            'UTF-8'
+        );
+    }
+
+    return mb_strtoupper($initials, 'UTF-8');
+};
+
+$format_date = static function (string $date, bool $include_time = false): string {
+    $timestamp = strtotime($date);
+
+    if ($timestamp === false) {
+        return $date;
+    }
+
+    return date(
+        $include_time ? 'M j, Y \a\t g:i A' : 'M j, Y',
+        $timestamp
+    );
+};
+
+$post_initials = $build_initials($post['full_name']);
+$comments_count = count($comments);
+
 ?>
 
 <section class="post-details">
 
-    <h1>
-        <?= htmlspecialchars(
-            $post['title'],
-            ENT_QUOTES,
-            'UTF-8'
-        ) ?>
-    </h1>
+    <header class="post-view-header">
+        <div class="post-author-avatar" aria-hidden="true">
+            <?= htmlspecialchars($post_initials, ENT_QUOTES, 'UTF-8') ?>
+        </div>
 
-    <p>
-        <strong>Author:</strong>
-        <?= htmlspecialchars(
-            $post['full_name'],
-            ENT_QUOTES,
-            'UTF-8'
-        ) ?>
-    </p>
+        <div class="post-author-identity">
+            <strong class="post-author-name">
+                <?= htmlspecialchars(
+                    $post['full_name'],
+                    ENT_QUOTES,
+                    'UTF-8'
+                ) ?>
+            </strong>
 
-    <p>
-        <strong>Created At:</strong>
-        <?= htmlspecialchars(
-            $post['created_at'],
-            ENT_QUOTES,
-            'UTF-8'
-        ) ?>
-    </p>
+            <?php if (!empty($post['username'])): ?>
+                <span class="post-author-handle">
+                    @<?= htmlspecialchars(
+                        $post['username'],
+                        ENT_QUOTES,
+                        'UTF-8'
+                    ) ?>
+                </span>
+            <?php endif; ?>
+        </div>
 
-    <div>
-        <strong>Text:</strong>
+        <time
+            class="post-published-date"
+            datetime="<?= htmlspecialchars(
+                $post['created_at'],
+                ENT_QUOTES,
+                'UTF-8'
+            ) ?>"
+        >
+            <?= htmlspecialchars(
+                $format_date($post['created_at']),
+                ENT_QUOTES,
+                'UTF-8'
+            ) ?>
+        </time>
+    </header>
 
-        <p>
+    <div class="post-view-content">
+        <h1 class="post-view-title">
+            <?= htmlspecialchars(
+                $post['title'],
+                ENT_QUOTES,
+                'UTF-8'
+            ) ?>
+        </h1>
+
+        <div class="post-view-text">
             <?= nl2br(
                 htmlspecialchars(
                     $post['post_text'],
@@ -124,51 +188,31 @@ if (isset($_SESSION['user_id'])) {
                     'UTF-8'
                 )
             ) ?>
-        </p>
+        </div>
+
+        <?php if (!empty($post['image_path'])): ?>
+            <div class="post-image">
+                <img
+                    src="<?= htmlspecialchars(
+                        $post['image_path'],
+                        ENT_QUOTES,
+                        'UTF-8'
+                    ) ?>"
+                    alt="Image attached to <?= htmlspecialchars(
+                        $post['title'],
+                        ENT_QUOTES,
+                        'UTF-8'
+                    ) ?>"
+                >
+            </div>
+        <?php endif; ?>
     </div>
 
-    <?php if (!empty($post['image_path'])): ?>
-        <div class="post-image">
-            <img
-                src="<?= htmlspecialchars(
-                    $post['image_path'],
-                    ENT_QUOTES,
-                    'UTF-8'
-                ) ?>"
-                alt="Image attached to the post"
-                style="max-width: 400px; height: auto;"
-            >
-        </div>
-    <?php endif; ?>
-
-    <?php if (
-        isset($_SESSION['user_id']) &&
-        (int) $_SESSION['user_id'] === (int) $post['user_id']
-    ): ?>
-        <form
-            method="post"
-            action="post/delete.php"
-            onsubmit="return confirmDelete();"
-        >
-            <input
-                type="hidden"
-                name="post_id"
-                value="<?= (int) $post['post_id'] ?>"
-            >
-            <button type="submit" style="color: red;">
-                Delete Post
-            </button>
-        </form>
-    <?php endif; ?>
-
-    <!-- قسم اللايكات -->
-    <div class="post-likes">
-        <p class="post-meta">
-            <?= $likes_count ?> like<?= $likes_count === 1 ? '' : 's' ?>
-        </p>
+    <div class="post-action-row" aria-label="Post actions">
 
         <?php if (isset($_SESSION['user_id'])): ?>
             <form
+                class="post-like-form"
                 method="post"
                 action="post/like.php"
             >
@@ -179,62 +223,121 @@ if (isset($_SESSION['user_id'])) {
                 >
 
                 <button
+                    class="post-action-button post-like-button<?= $user_liked ? ' is-active' : '' ?>"
                     type="submit"
-                    class="<?= $user_liked ? 'button-secondary' : '' ?>"
+                    aria-label="<?= $user_liked ? 'Unlike this post' : 'Like this post' ?>"
                 >
-                    <?= $user_liked ? 'Unlike' : 'Like' ?>
+                    <span class="post-action-icon" aria-hidden="true">
+                        <?= $user_liked ? '&#9829;' : '&#9825;' ?>
+                    </span>
+                    <span><?= $user_liked ? 'Unlike' : 'Like' ?></span>
+                    <span class="post-action-count"><?= $likes_count ?></span>
                 </button>
             </form>
+        <?php else: ?>
+            <span
+                class="post-action-button"
+                aria-label="<?= $likes_count ?> likes"
+            >
+                <span class="post-action-icon" aria-hidden="true">&#9825;</span>
+                <span>Like</span>
+                <span class="post-action-count"><?= $likes_count ?></span>
+            </span>
         <?php endif; ?>
+
+        <a class="post-action-button" href="#post-comments">
+            <span class="post-action-icon" aria-hidden="true">&#128172;</span>
+            <span>Comments</span>
+            <span class="post-action-count"><?= $comments_count ?></span>
+        </a>
     </div>
 
-    <!-- قسم التعليقات -->
-    <div class="post-comments">
-        <h2>Comments</h2>
+    <section class="post-comments" id="post-comments">
+        <header class="post-comments-header">
+            <h2>Comments</h2>
+            <span><?= $comments_count ?></span>
+        </header>
 
         <?php if (empty($comments)): ?>
-            <p>No comments yet. Be the first to comment.</p>
+            <p class="post-comments-empty">
+                No comments yet. Be the first to comment.
+            </p>
         <?php else: ?>
-            <?php foreach ($comments as $comment): ?>
-                <div class="post-comment">
-                    <p>
-                        <strong>
-                            <?= htmlspecialchars(
-                                $comment['full_name'],
-                                ENT_QUOTES,
-                                'UTF-8'
-                            ) ?>
-                        </strong>
-                        <span class="post-meta">
-                            ·
-                            <?= htmlspecialchars(
-                                $comment['created_at'],
-                                ENT_QUOTES,
-                                'UTF-8'
-                            ) ?>
-                        </span>
-                    </p>
+            <div class="post-comment-list">
 
-                    <p>
-                        <?= nl2br(
-                            htmlspecialchars(
-                                $comment['comment_text'],
+                <?php foreach ($comments as $comment): ?>
+                    <?php
+                    $comment_initials = $build_initials(
+                        $comment['full_name']
+                    );
+                    ?>
+
+                    <article class="post-comment">
+                        <div class="comment-avatar" aria-hidden="true">
+                            <?= htmlspecialchars(
+                                $comment_initials,
                                 ENT_QUOTES,
                                 'UTF-8'
-                            )
-                        ) ?>
-                    </p>
-                </div>
-            <?php endforeach; ?>
+                            ) ?>
+                        </div>
+
+                        <div class="comment-content">
+                            <header class="comment-header">
+                                <strong>
+                                    <?= htmlspecialchars(
+                                        $comment['full_name'],
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    ) ?>
+                                </strong>
+
+                                <?php if (!empty($comment['username'])): ?>
+                                    <span class="comment-handle">
+                                        @<?= htmlspecialchars(
+                                            $comment['username'],
+                                            ENT_QUOTES,
+                                            'UTF-8'
+                                        ) ?>
+                                    </span>
+                                <?php endif; ?>
+
+                                <time
+                                    datetime="<?= htmlspecialchars(
+                                        $comment['created_at'],
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    ) ?>"
+                                >
+                                    <?= htmlspecialchars(
+                                        $format_date(
+                                            $comment['created_at'],
+                                            true
+                                        ),
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    ) ?>
+                                </time>
+                            </header>
+
+                            <p>
+                                <?= nl2br(
+                                    htmlspecialchars(
+                                        $comment['comment_text'],
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    )
+                                ) ?>
+                            </p>
+                        </div>
+                    </article>
+                <?php endforeach; ?>
+
+            </div>
         <?php endif; ?>
-    </div>
 
-    <!-- نموذج إضافة تعليق -->
-    <?php if (isset($_SESSION['user_id'])): ?>
-        <div class="post-add-comment">
-            <h3>Add a comment</h3>
-
+        <?php if (isset($_SESSION['user_id'])): ?>
             <form
+                class="post-comment-form"
                 method="post"
                 action="post/comment_add.php"
             >
@@ -243,19 +346,51 @@ if (isset($_SESSION['user_id'])) {
                     name="post_id"
                     value="<?= (int) $post['post_id'] ?>"
                 >
+
+                <label class="visually-hidden" for="comment-text">
+                    Write a comment
+                </label>
+
                 <textarea
+                    id="comment-text"
                     name="comment_text"
-                    rows="3"
+                    rows="1"
                     maxlength="1000"
+                    placeholder="Write a comment..."
                     required
                 ></textarea>
 
-                <button type="submit">
-                    Post Comment
+                <button class="post-comment-submit" type="submit">
+                    Post
                 </button>
             </form>
-        </div>
+        <?php endif; ?>
+    </section>
+
+    <?php if (
+        isset($_SESSION['user_id']) &&
+        (int) $_SESSION['user_id'] === (int) $post['user_id']
+    ): ?>
+        <footer class="post-owner-actions">
+            <form
+                class="post-delete-form"
+                method="post"
+                action="post/delete.php"
+                onsubmit="return confirmDelete();"
+            >
+                <input
+                    type="hidden"
+                    name="post_id"
+                    value="<?= (int) $post['post_id'] ?>"
+                >
+
+                <button class="post-delete-button" type="submit">
+                    Delete Post
+                </button>
+            </form>
+        </footer>
     <?php endif; ?>
+
 </section>
 
 <script src="assets/js/delete-confirmation.js"></script>
