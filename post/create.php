@@ -8,14 +8,7 @@ $title = '';
 $post_text = '';
 $image_path = null;
 
-/*
-|--------------------------------------------------------------------------
-| Verify that the user is logged in
-|--------------------------------------------------------------------------
-|
-| index.php should already start the session before loading this file.
-|
-*/
+
 
 if (!isset($_SESSION['user_id'])) {
     echo '<p style="color:red;">You must log in before creating a post.</p>';
@@ -28,11 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $post_text = trim($_POST['post_text'] ?? '');
     $user_id = (int) $_SESSION['user_id'];
 
-    /*
-    |--------------------------------------------------------------------------
-    | Validate title
-    |--------------------------------------------------------------------------
-    */
+
 
     if ($title === '') {
         $errors[] = 'Title cannot be empty.';
@@ -40,11 +29,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = 'Title cannot exceed 255 characters.';
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Validate post text
-    |--------------------------------------------------------------------------
-    */
 
     if ($post_text === '') {
         $errors[] = 'Post text cannot be empty.';
@@ -53,11 +37,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = 'Post text cannot exceed 2000 characters.';
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Handle optional image upload
-    |--------------------------------------------------------------------------
-    */
 
     if (
         isset($_FILES['image']) &&
@@ -99,11 +78,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } else {
                     $extension = $allowed_types[$mime_type];
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | Prepare upload directory
-                    |--------------------------------------------------------------------------
-                    */
 
                     $upload_dir =
                         __DIR__ . '/../uploads/posts/';
@@ -117,11 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             'Could not create the image upload directory.';
                     }
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | Generate and store the image
-                    |--------------------------------------------------------------------------
-                    */
+
 
                     if (empty($errors)) {
                         $new_name =
@@ -155,11 +125,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Insert post into the database
-    |--------------------------------------------------------------------------
-    */
+    
 
     if (empty($errors)) {
 
@@ -196,9 +162,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         } catch (PDOException $e) {
 
-            /*
-             * Remove the uploaded image when database insertion fails.
-             */
+
             if ($image_path !== null) {
                 $uploaded_file =
                     __DIR__ . '/../' . $image_path;
@@ -208,8 +172,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
 
-            $errors[] =
-                'Failed to create the post. Please try again.';
+            // $errors[] =
+            //     'Failed to create the post. Please try again.';
+
+            error_log(
+                'Database error while creating post: ' .
+                $e->getMessage()
+            );
         }
     }
 }
