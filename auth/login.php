@@ -31,6 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $conn->prepare("
             SELECT
                 user_id,
+                username,
                 full_name,
                 email,
                 password
@@ -52,6 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['user_id'] = $user['user_id'];
             $_SESSION['full_name'] = $user['full_name'];
             $_SESSION['email'] = $user['email'];
+            $_SESSION['username'] = $user['username'];
 
             header('Location: ../index.php');
             exit;
