@@ -72,179 +72,161 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Login | Shot Share</title>
 
-    <link
-        rel="stylesheet"
-        href="../assets/css/style.css"
-    >
+    <link rel="stylesheet" href="../assets/css/style.css">
 
-    <script
-        src="../assets/js/main.js"
-        defer
-    ></script>
+    <script src="../assets/js/main.js" defer></script>
 </head>
 
 <body class="auth-body">
 
-<div class="auth-page">
+    <div class="auth-page">
 
-    <header class="auth-topbar">
+        <header class="auth-topbar">
 
-        <a class="auth-brand" href="login.php">
-            <span class="auth-brand-mark" aria-hidden="true"></span>
-            <span>Shot Share</span>
-        </a>
+            <a class="auth-brand" href="login.php">
+                <span class="auth-brand-mark" aria-hidden="true"></span>
+                <span>Shot Share</span>
+            </a>
 
-        <button
-            class="auth-theme-toggle"
-            id="theme-toggle"
-            type="button"
-            aria-pressed="false"
-            title="Switch theme"
-        >
-            <span id="theme-toggle-icon" aria-hidden="true">&#9680;</span>
-            <span id="theme-toggle-label">Dark Mode</span>
-        </button>
+            <button class="auth-theme-toggle" id="theme-toggle" type="button" aria-pressed="false" title="Switch theme">
+                <span id="theme-toggle-icon" aria-hidden="true">&#9680;</span>
+                <span id="theme-toggle-label">Dark Mode</span>
+            </button>
 
-    </header>
+        </header>
 
-    <main class="auth-main">
+        <main class="auth-main">
 
-        <section class="auth-intro" aria-labelledby="login-intro-title">
-            <p class="auth-eyebrow">Welcome to Shot Share</p>
+            <section class="auth-intro" aria-labelledby="login-intro-title">
+                <p class="auth-eyebrow">Welcome to Shot Share</p>
 
-            <h1 id="login-intro-title">
-                Share moments.
-                <span>Connect people.</span>
-            </h1>
+                <h1 id="login-intro-title">
+                    Share moments.
+                    <span>Connect people.</span>
+                </h1>
 
-            <p class="auth-intro-text">
-                A simple place to share photos, ideas, and everyday moments
-                with your community.
-            </p>
+                <p class="auth-intro-text">
+                    A simple place to share photos, ideas, and everyday moments
+                    with your community.
+                </p>
 
-            <div class="auth-benefits" aria-label="Shot Share features">
-                <div class="auth-benefit">
-                    <span aria-hidden="true">01</span>
-                    <p>
-                        <strong>Share simply</strong>
-                        <small>Publish a thought or photo in a few steps.</small>
-                    </p>
+                <div class="auth-benefits" aria-label="Shot Share features">
+                    <div class="auth-benefit">
+                        <span aria-hidden="true">01</span>
+                        <p>
+                            <strong>Share simply</strong>
+                            <small>Publish a thought or photo in a few steps.</small>
+                        </p>
+                    </div>
+
+                    <div class="auth-benefit">
+                        <span aria-hidden="true">02</span>
+                        <p>
+                            <strong>Stay connected</strong>
+                            <small>See the latest posts from the community.</small>
+                        </p>
+                    </div>
+
+                    <div class="auth-benefit">
+                        <span aria-hidden="true">03</span>
+                        <p>
+                            <strong>Keep it personal</strong>
+                            <small>Your account keeps your activity together.</small>
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="auth-card" aria-labelledby="login-title">
+
+                <div class="auth-card-header">
+                    <span class="auth-card-mark" aria-hidden="true"></span>
+                    <p class="auth-eyebrow">Your account</p>
+                    <h2 id="login-title">Welcome back</h2>
+                    <p>Sign in to continue to Shot Share.</p>
                 </div>
 
-                <div class="auth-benefit">
-                    <span aria-hidden="true">02</span>
-                    <p>
-                        <strong>Stay connected</strong>
-                        <small>See the latest posts from the community.</small>
-                    </p>
-                </div>
+                <?php if (
+                    isset($_GET['registered']) &&
+                    $_GET['registered'] === '1'
+                ): ?>
 
-                <div class="auth-benefit">
-                    <span aria-hidden="true">03</span>
-                    <p>
-                        <strong>Keep it personal</strong>
-                        <small>Your account keeps your activity together.</small>
-                    </p>
-                </div>
-            </div>
-        </section>
+                    <div class="success-message auth-alert" role="status">
+                        Account created successfully. You can sign in now.
+                    </div>
 
-        <section class="auth-card" aria-labelledby="login-title">
+                <?php endif; ?>
 
-            <div class="auth-card-header">
-                <span class="auth-card-mark" aria-hidden="true"></span>
-                <p class="auth-eyebrow">Your account</p>
-                <h2 id="login-title">Welcome back</h2>
-                <p>Sign in to continue to Shot Share.</p>
-            </div>
+                <?php if (!empty($errors)): ?>
 
-            <?php if (
-                isset($_GET['registered']) &&
-                $_GET['registered'] === '1'
-            ): ?>
+                    <div class="errors auth-alert" role="alert">
+                        <p>Please check the following:</p>
 
-                <div class="success-message auth-alert" role="status">
-                    Account created successfully. You can sign in now.
-                </div>
+                        <ul>
+                            <?php foreach ($errors as $error): ?>
+                                <li>
+                                    <?= htmlspecialchars(
+                                        $error,
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    ) ?>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
 
-            <?php endif; ?>
+                <?php endif; ?>
 
-            <?php if (!empty($errors)): ?>
+                <form class="auth-form" method="POST" action="">
 
-                <div class="errors auth-alert" role="alert">
-                    <p>Please check the following:</p>
+                    <div class="auth-field">
+                        <label for="email">Email address</label>
 
-                    <ul>
-                        <?php foreach ($errors as $error): ?>
-                            <li>
-                                <?= htmlspecialchars(
-                                    $error,
-                                    ENT_QUOTES,
-                                    'UTF-8'
-                                ) ?>
-                            </li>
-                        <?php endforeach; ?>
-                    </ul>
-                </div>
-
-            <?php endif; ?>
-
-            <form class="auth-form" method="POST" action="">
-
-                <div class="auth-field">
-                    <label for="email">Email address</label>
-
-                    <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        value="<?= htmlspecialchars(
+                        <input type="email" id="email" name="email" value="<?= htmlspecialchars(
                             $email,
                             ENT_QUOTES,
                             'UTF-8'
-                        ) ?>"
-                        placeholder="name@example.com"
-                        autocomplete="email"
-                        required
-                    >
-                </div>
+                        ) ?>" placeholder="name@example.com" autocomplete="email" required>
+                    </div>
 
-                <div class="auth-field">
-                    <label for="password">Password</label>
+                    <div class="auth-field">
+                        <label for="password">Password</label>
 
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        placeholder="Enter your password"
-                        autocomplete="current-password"
-                        required
-                    >
-                </div>
+                        <input type="password" id="password" name="password" placeholder="Enter your password"
+                            autocomplete="current-password" required>
+                    </div>
 
-                <button class="auth-submit" type="submit">
-                    Sign In
-                </button>
+                    <button class="auth-submit" type="submit">
+                        Sign In
+                    </button>
 
-            </form>
+                </form>
 
-            <p class="auth-switch">
-                Don't have an account?
-                <a href="register.php">Create one</a>
-            </p>
+                <p class="auth-switch">
+                    Don't have an account?
+                    <a href="register.php">Create one</a>
+                </p>
 
-        </section>
+            </section>
 
-    </main>
+        </main>
 
-</div>
+    </div>
+    <?php if (!empty($errors)): ?>
+        <script>
+            window.loginErrors = <?= json_encode($errors) ?>;
+        </script>
+    <?php endif; ?>
+
+    <script src="../assets/js/login.js"></script>
+
+    <script src="../assets/js/login.js"></script>
+
 
 </body>
+
 </html>
